@@ -82,6 +82,20 @@ messaggio.
 
 ## Installazione
 
+### Scaricare una release
+
+Scarica il binario per la tua piattaforma dalla
+[pagina delle release](https://gitlab.com/lyoneel/cli-tg-notify/-/releases)
+(ad esempio `tg-notify-linux-amd64`), rendilo eseguibile e aggiungi la
+sua directory al `PATH` oppure spostala in una directory già nel `PATH`:
+
+```bash
+chmod +x tg-notify-linux-amd64
+mkdir -p ~/bin && mv tg-notify-linux-amd64 ~/bin/tg-notify
+```
+
+Assicurati che `~/bin` (o la directory scelta) sia nel `PATH`.
+
 ### go install
 
 ```bash

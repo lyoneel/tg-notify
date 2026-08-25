@@ -81,6 +81,20 @@ text argument becomes the file's caption instead of a message.
 
 ## Installation
 
+### Download a release
+
+Grab the binary for your platform from the
+[releases page](https://gitlab.com/lyoneel/cli-tg-notify/-/releases)
+(e.g. `tg-notify-linux-amd64`), then make it executable and either add
+its directory to `PATH` or move it into a directory already on `PATH`:
+
+```bash
+chmod +x tg-notify-linux-amd64
+mkdir -p ~/bin && mv tg-notify-linux-amd64 ~/bin/tg-notify
+```
+
+Make sure `~/bin` (or whichever directory you choose) is on `PATH`.
+
 ### go install
 
 ```bash
