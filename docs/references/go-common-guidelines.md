@@ -77,7 +77,7 @@ application. Load this document for every Go project, then load
    `GOARCH` set inline per command (they do not leak into the shell),
    and version injection via
    `go build -ldflags "-X main.version=$(VERSION)"` with
-   `VERSION ?= dev` so callers override it: `make release VERSION=v1.2.0`.
+   `VERSION ?= dev` so callers override it: `make release VERSION=v1.2.20260820`.
 2. Operations targets (`push`, `deploy`): gate them on helper targets,
    run quality checks first.
 

@@ -24,7 +24,7 @@ description. `release` builds the common platforms (linux amd64,
 darwin amd64/arm64, windows amd64, Raspberry Pi arm v6/v7) for local
 testing; `release-all` cross-compiles every supported platform (linux,
 darwin, windows, freebsd, openbsd, with arm and riscv64 variants). Both
-stamp the version via `VERSION ?=`, e.g. `make release VERSION=v1.2.0`.
+stamp the version via `VERSION ?=`, e.g. `make release VERSION=v1.2.20260820`.
 
 `make run` is the intended dev workflow for quick sends: it builds the
 binary, then executes it. A bare positional argument is treated as

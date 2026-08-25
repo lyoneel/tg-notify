@@ -1,5 +1,5 @@
 ---
-version: 1.0.0
+version: 1.0.20260820
 last-updated: 2026-08-20
 title: Changelog
 description: Release history for tg-notify
@@ -73,7 +73,7 @@ Releases use the date-build scheme:
   `--whoami`, or `--offset` without `--discover-chat-id`) are rejected
   with an error instead of being silently ignored.
 
-## v1.0.0
+## v1.0.20260820
 
 ### Added
 

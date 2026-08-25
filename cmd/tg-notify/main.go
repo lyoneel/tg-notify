@@ -22,7 +22,7 @@ import (
 )
 
 // version can be injected at build time:
-// go build -ldflags "-X main.version=v1.2.3". When empty, the version
+// go build -ldflags "-X main.version=v1.2.20260820". When empty, the version
 // is derived from the embedded build info (module version for
 // go install, VCS revision for local builds).
 var version = ""
