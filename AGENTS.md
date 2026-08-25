@@ -84,8 +84,9 @@ docs/             # Go guidelines references, plans
 CHANGELOG.md      # release history (date-build scheme)
 .editorconfig     # editor settings (workspace standard)
 .gitignore        # Go, build output, OS patterns
-.github/workflows/ci.yml  # shared CI (github + gitea; Gitea scans .github as fallback)
-.gitlab-ci.yml            # GitLab CI (separate dialect, never shared)
+.github/workflows/ci.yml  # GitHub Actions CI (build + test)
+.github/workflows/release.yml  # GitHub Actions release on tags
+.gitlab-ci.yml            # GitLab CI (build/test, security, release)
 pkg/              # empty skeleton
 config/           # empty skeleton
 ```
