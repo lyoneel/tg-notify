@@ -7,6 +7,8 @@ description: Go CLI for sending Telegram messages and files via the Bot API
 
 # Ly's CLI Telegram Notify
 
+**English** | [Español](README.es.md) | [Italiano](README.it.md) | [Português](README.pt.md)
+
 > **Main repository**: https://gitlab.com/lyoneel/cli-tg-notify.
 > If you are reading this on any other host, it is a mirror. Please
 > open issues and merge requests on GitLab.
