@@ -1,4 +1,4 @@
-# AGENTS.md — tg-notify
+# AGENTS.md — Ly CLI Telegram Notify
 
 ## What it is
 
