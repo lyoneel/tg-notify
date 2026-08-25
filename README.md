@@ -252,6 +252,10 @@ file is loaded before the environment is read, so file-supplied values
 fill in any unset variable; real environment variables and flags always
 win over the file.
 
+Note: this CLI treats `socks5://` and `socks5h://` identically (the
+Go SOCKS5 dialer always sends hostnames to the proxy), so the
+curl-style local-vs-remote DNS distinction does not apply.
+
 ### JSON output
 
 Pass `--json` to print a single machine-readable line instead of the

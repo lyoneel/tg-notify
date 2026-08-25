@@ -7,6 +7,8 @@ package telegram
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -38,6 +40,8 @@ type Bot struct {
 	jsonClient     *http.Client
 	fileJSONClient *http.Client
 	uploadClient   *http.Client
+
+	proxyRootCAs *x509.CertPool
 }
 
 // New creates a Bot for the given token against the production API.
@@ -64,6 +68,9 @@ func (b *Bot) SetBaseURL(u string) {
 // variables).
 func (b *Bot) SetProxy(proxyURL string) error {
 	if proxyURL == "" {
+		b.jsonClient.Transport = nil
+		b.fileJSONClient.Transport = nil
+		b.uploadClient.Transport = nil
 		return nil
 	}
 	u, err := url.Parse(proxyURL)
@@ -91,10 +98,38 @@ func (b *Bot) SetProxy(proxyURL string) error {
 	default:
 		return fmt.Errorf("unsupported proxy scheme: %s", u.Scheme)
 	}
+	if b.proxyRootCAs != nil {
+		transport.TLSClientConfig = &tls.Config{RootCAs: b.proxyRootCAs, MinVersion: tls.VersionTLS12}
+	}
 
 	b.jsonClient.Transport = transport
 	b.fileJSONClient.Transport = transport
 	b.uploadClient.Transport = transport
+	return nil
+}
+
+// SetProxyTLSRootCAs adds PEM-encoded certificates to the root pool
+// used to verify TLS proxies (the https:// scheme), e.g. a
+// self-signed test proxy. It is callable before or after SetProxy:
+// transports configured later pick the pool up, and transports
+// already in place are updated. It returns an error when no
+// certificate in pemCerts parses.
+func (b *Bot) SetProxyTLSRootCAs(pemCerts []byte) error {
+	pool := x509.NewCertPool()
+	if !pool.AppendCertsFromPEM(pemCerts) {
+		return fmt.Errorf("no proxy root certificates parsed from PEM data")
+	}
+	b.proxyRootCAs = pool
+	for _, client := range []*http.Client{b.jsonClient, b.fileJSONClient, b.uploadClient} {
+		transport, ok := client.Transport.(*http.Transport)
+		if !ok {
+			continue
+		}
+		if transport.TLSClientConfig == nil {
+			transport.TLSClientConfig = &tls.Config{}
+		}
+		transport.TLSClientConfig.RootCAs = pool
+	}
 	return nil
 }
 

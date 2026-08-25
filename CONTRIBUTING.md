@@ -46,6 +46,17 @@ Tests live next to the code they cover (`*_test.go`). The Bot API
 client is tested against a local `httptest` server; no network or real
 bot token is required.
 
+Proxy behaviour is covered by hermetic end-to-end tests that run
+recording HTTP, TLS, and SOCKS5 proxies (`internal/testproxy`) in
+front of a fake Bot API, plus a thin exec-the-binary smoke layer that
+covers env resolution, `.env` loading, exit codes, and token
+scrubbing. Everything binds loopback on dynamic ports; no external
+proxy or real token is needed. Proxy failure-path tests always pass
+`--no-retry` because connection errors are transient-retried by
+default. `make e2e-docker` runs an optional Docker Compose smoke stack
+against real third-party proxies (squid, go-socks5-proxy); it skips
+cleanly when docker is not installed and never blocks `make test`.
+
 ## Git workflow
 
 - Branch from `master` with a short, descriptive name.

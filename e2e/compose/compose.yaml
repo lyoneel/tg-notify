@@ -1,0 +1,43 @@
+name: tg-notify-proxy-e2e
+
+# Verified against ubuntu/squid:latest (squid 6.13, conf mounted at
+# /etc/squid/squid.conf, access log at /var/log/squid/access.log) and
+# serjs/go-socks5-proxy:latest (auth via PROXY_USER/PROXY_PASSWORD),
+# 2026-08-25, during Task 5.7 of the proxy-e2e-testing plan.
+
+services:
+  fakeapi:
+    build:
+      context: ../..
+      dockerfile: e2e/compose/fakeapi.Dockerfile
+    expose:
+      - "8080"
+
+  squid:
+    image: ubuntu/squid:latest
+    volumes:
+      - ./squid.conf:/etc/squid/squid.conf:ro
+    expose:
+      - "3128"
+
+  socks5:
+    image: serjs/go-socks5-proxy:latest
+    environment:
+      PROXY_USER: proxyuser
+      PROXY_PASSWORD: proxypass
+    expose:
+      - "1080"
+
+  notify:
+    build:
+      context: ../..
+      dockerfile: e2e/compose/notify.Dockerfile
+    depends_on:
+      - fakeapi
+      - squid
+      - socks5
+    environment:
+      FAKEAPI_URL: http://fakeapi:8080
+      HTTP_PROXY_URL: http://squid:3128
+      SOCKS5_PROXY_URL: socks5://proxyuser:proxypass@socks5:1080
+    entrypoint: ["/entrypoint.sh"]
