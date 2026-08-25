@@ -25,7 +25,15 @@ build-test:
   script:
   - go build ./...
   - go vet ./...
-  - go test ./...
+  - go test -coverprofile=cover.out ./...
+  - go tool cover -func=cover.out
+  - go run github.com/boumenot/gocover-cobertura@v1.5.0 < cover.out > coverage.xml
+  coverage: '/total:\s+\(statements\)\s+\d+\.\d+%/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
   rules:
   - if: $CI_MERGE_REQUEST_IID
   - if: $CI_COMMIT_BRANCH == "master"
