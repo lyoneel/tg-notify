@@ -1,5 +1,5 @@
 ---
-version: 1.0.20260820
+version: 1.0.0
 last-updated: 2026-08-20
 title: Ly's CLI Telegram Notify
 description: Go CLI for sending Telegram messages and files via the Bot API
@@ -103,7 +103,7 @@ lists them. The version stamps itself: `make build` injects
 `-v`. Override with:
 
 ```bash
-make build VERSION=v1.0.20260820
+make build VERSION=v1.0.0
 ```
 
 ### Configure
