@@ -85,9 +85,34 @@ messaggio.
 ### Scaricare una release
 
 Scarica il binario per la tua piattaforma dalla
-[pagina delle release](https://gitlab.com/lyoneel/cli-tg-notify/-/releases)
-(ad esempio `tg-notify-linux-amd64`), rendilo eseguibile e aggiungi la
-sua directory al `PATH` oppure spostala in una directory già nel `PATH`:
+[pagina delle release](https://gitlab.com/lyoneel/cli-tg-notify/-/releases).
+I nomi degli asset seguono lo schema `tg-notify-<os>-<arch>`, ad
+esempio `tg-notify-windows-amd64.exe`, `tg-notify-linux-amd64` o
+`tg-notify-darwin-arm64`.
+
+**Windows**
+
+Scarica il `.exe` per la tua architettura, rinominalo in
+`tg-notify.exe` e spostalo in una directory già presente nel `PATH`;
+oppure tienilo in una sua cartella e aggiungi quella cartella al
+`PATH`. In PowerShell:
+
+```powershell
+$bin = "$env:USERPROFILE\bin"
+New-Item -ItemType Directory -Force $bin | Out-Null
+Move-Item .\tg-notify-windows-amd64.exe "$bin\tg-notify.exe"
+[Environment]::SetEnvironmentVariable("Path",
+  [Environment]::GetEnvironmentVariable("Path", "User") + ";$bin",
+  "User")
+```
+
+In alternativa, aggiungi la cartella da Impostazioni > Sistema >
+Informazioni > Impostazioni di sistema avanzate > Variabili d'ambiente.
+
+**Linux/macOS**
+
+Rendi il binario eseguibile e aggiungi la sua directory al `PATH`
+oppure spostala in una directory già nel `PATH`:
 
 ```bash
 chmod +x tg-notify-linux-amd64

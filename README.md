@@ -84,9 +84,33 @@ text argument becomes the file's caption instead of a message.
 ### Download a release
 
 Grab the binary for your platform from the
-[releases page](https://gitlab.com/lyoneel/cli-tg-notify/-/releases)
-(e.g. `tg-notify-linux-amd64`), then make it executable and either add
-its directory to `PATH` or move it into a directory already on `PATH`:
+[releases page](https://gitlab.com/lyoneel/cli-tg-notify/-/releases).
+Asset names follow the `tg-notify-<os>-<arch>` pattern, e.g.
+`tg-notify-windows-amd64.exe`, `tg-notify-linux-amd64`, or
+`tg-notify-darwin-arm64`.
+
+**Windows**
+
+Download the `.exe` for your architecture, rename it to
+`tg-notify.exe`, and move it into a directory already on `PATH`; or
+keep it in its own folder and add that folder to `PATH`. In PowerShell:
+
+```powershell
+$bin = "$env:USERPROFILE\bin"
+New-Item -ItemType Directory -Force $bin | Out-Null
+Move-Item .\tg-notify-windows-amd64.exe "$bin\tg-notify.exe"
+[Environment]::SetEnvironmentVariable("Path",
+  [Environment]::GetEnvironmentVariable("Path", "User") + ";$bin",
+  "User")
+```
+
+Alternatively, add the folder through Settings > System > About >
+Advanced system settings > Environment Variables.
+
+**Linux/macOS**
+
+Make the binary executable and either add its directory to `PATH` or
+move it into a directory already on `PATH`:
 
 ```bash
 chmod +x tg-notify-linux-amd64
