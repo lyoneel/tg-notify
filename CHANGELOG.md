@@ -1,5 +1,5 @@
 ---
-version: 1.0.20260825
+version: 1.1.20260825
 last-updated: 2026-08-25
 title: Changelog
 description: Release history for tg-notify
@@ -15,6 +15,23 @@ Releases use the date-build scheme:
   the calendar day.
 - `vMAJOR.MINOR.YYYYMMDD`: stable release; no suffix, supersedes the
   prereleases of that date.
+
+## v1.1.20260825
+
+### Added
+
+- Spanish, Italian, and Portuguese README translations, with a language
+  bar at the top of each README.
+- Release download documentation in every README, including the Windows
+  steps, covering the binaries published by the CI release jobs.
+- End-to-end proxy tests: message, file, album, `--whoami`, and
+  `--discover-chat-id` sends go through recording HTTP, HTTPS, and
+  SOCKS5 proxies, and every request and response is asserted; a Docker
+  Compose smoke stack (`make e2e-docker`) exercises the same flows
+  through Squid and a third-party SOCKS5 proxy, with a manual runbook
+  in `docs/manual-proxy-e2e.md`.
+- Test coverage reporting on merge requests from the Go test Cobertura
+  profile.
 
 ## v1.0.20260825
 

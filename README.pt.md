@@ -1,5 +1,5 @@
 ---
-version: 1.0.20260825
+version: 1.1.20260825
 last-updated: 2026-08-25
 title: Ly's CLI Telegram Notify
 description: CLI em Go para enviar mensagens e arquivos do Telegram pela Bot API
@@ -144,7 +144,7 @@ os lista. A versão se auto-marca: `make build` injeta
 `-v`. Sobrescreva com:
 
 ```bash
-make build VERSION=v1.0.20260825
+make build VERSION=v1.1.20260825
 ```
 
 ### Configurar
