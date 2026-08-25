@@ -1,6 +1,6 @@
 ---
-version: 1.0.20260820
-last-updated: 2026-08-20
+version: 1.0.20260825
+last-updated: 2026-08-25
 title: Changelog
 description: Release history for tg-notify
 ---
@@ -16,7 +16,7 @@ Releases use the date-build scheme:
 - `vMAJOR.MINOR.YYYYMMDD`: stable release; no suffix, supersedes the
   prereleases of that date.
 
-## Unreleased
+## v1.0.20260825
 
 ### Added
 
