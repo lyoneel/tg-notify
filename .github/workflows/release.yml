@@ -1,0 +1,53 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Build binaries
+        run: make release-all VERSION=${{ github.ref_name }}
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          server="${GITHUB_SERVER_URL:-}"
+          echo "server_url=${server}"
+
+          if [[ "$server" == *github.com* ]]; then
+            echo "Publishing to GitHub"
+            gh release create "$REF_NAME" \
+              --title "$REF_NAME" \
+              --notes "tg-notify $REF_NAME" \
+              build/tg-notify-*
+          else
+            echo "Publishing to Gitea"
+            api() { curl -ksS -H "Authorization: token $GH_TOKEN" "$@"; }
+            repo="lyoneel/cli-tg-notify"
+            api -X POST -H "Content-Type: application/json" \
+              -d "{\"tag_name\":\"$REF_NAME\",\"name\":\"$REF_NAME\",\"body\":\"tg-notify $REF_NAME\"}" \
+              "$server/api/v1/repos/$repo/releases" || true
+            rel_id=$(api "$server/api/v1/repos/$repo/releases/tags/$REF_NAME" \
+              | python3 -c "import json,sys; print(json.load(sys.stdin)['id'])")
+            for f in build/tg-notify-*; do
+              api -X POST -F "attachment=@$f" \
+                "$server/api/v1/repos/$repo/releases/$rel_id/assets"
+            done
+          fi
