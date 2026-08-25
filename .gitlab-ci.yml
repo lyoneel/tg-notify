@@ -27,7 +27,7 @@ build-test:
   - go vet ./...
   - go test -coverprofile=cover.out ./...
   - go tool cover -func=cover.out
-  - go run github.com/boumenot/gocover-cobertura@v1.5.0 < cover.out > coverage.xml
+  - go run github.com/boumenot/gocover-cobertura@v1.4.0 < cover.out > coverage.xml
   coverage: '/total:\s+\(statements\)\s+\d+\.\d+%/'
   artifacts:
     reports:
