@@ -29,6 +29,9 @@ go.work.sum
 # Internal release notes (kept locally, never committed)
 RELEASE_SUMMARY.md
 
+# Local plans (kept locally, never committed)
+/docs/plans/
+
 # Build output (standard Makefile layout)
 /build/*
 !/build/.gitkeep

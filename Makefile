@@ -12,7 +12,7 @@ GO     := go
 GOFMT  := gofmt
 GOLINT := golangci-lint
 
-.PHONY: help build release release-all _release run test test-race fmt vet lint audit vuln bench deadcode generate clean
+.PHONY: help build release release-all _release run test test-race e2e-docker fmt vet lint audit vuln bench deadcode generate clean
 
 help: ## Show this help
 	@echo "$(NAME)"
@@ -20,7 +20,7 @@ help: ## Show this help
 	@echo "Usage: make <target>"
 	@echo ""
 	@echo "Targets:"
-	@grep -E '^[a-zA-Z_-]+:.*?##' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?##"} { printf "  \033[36m%-22s\033[0m %s\n", $$1, $$2 }'
+	@grep -E '^[a-zA-Z0-9_-]+:.*?##' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?##"} { printf "  \033[36m%-22s\033[0m %s\n", $$1, $$2 }'
 
 # --- Build ---
 
@@ -60,6 +60,9 @@ test: ## Run all tests
 
 test-race: ## Run tests with the race detector
 	@$(GO) test -race ./...
+
+e2e-docker: ## Run Docker Compose proxy smoke tests (needs docker)
+	@bash e2e/compose/run.sh
 
 fmt: ## Format Go code
 	@$(GOFMT) -w .

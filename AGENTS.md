@@ -79,7 +79,9 @@ cmd/tg-notify/discover.go # discover-chat-id mode (getUpdates)
 cmd/tg-notify/completion.go # shell completion (bash, zsh, fish)
 cmd/tg-notify/dotenv.go   # optional ./.env loading
 internal/telegram # Bot API client: client.go, files.go, filetype.go + tests
-Makefile          # build/run/quality targets (see make help)
+internal/testproxy # stdlib recording HTTP/TLS/SOCKS5 proxies for the proxy e2e tests
+e2e/compose/      # Docker Compose proxy smoke stack; make e2e-docker
+Makefile          # build/run/test/e2e-docker/quality targets (see make help)
 docs/             # Go guidelines references, plans
 CHANGELOG.md      # release history (date-build scheme)
 .editorconfig     # editor settings (workspace standard)
@@ -131,7 +133,9 @@ config/           # empty skeleton
   for all types (official API caps stay 10 MB photo / 50 MB other).
 - **Proxy**: `--proxy`/`-P` (or `TELEGRAM_PROXY`) supports `http`, `https`,
   `socks5`, and `socks5h`; a shared transport is set on all three HTTP
-  clients.
+  clients. `socks5://` and `socks5h://` behave identically (x/net
+  always sends hostnames to the proxy; there is no curl-style local
+  DNS distinction).
 - **Dry run**: `--dry-run`/`-D` prints the resolved request (method, chat ID,
   type, size, caption) without sending and without the token; it works
   with `--json`.
