@@ -85,7 +85,9 @@ messaggio.
 ### Scaricare una release
 
 Scarica il binario per la tua piattaforma dalla
-[pagina delle release](https://gitlab.com/lyoneel/cli-tg-notify/-/releases).
+[pagina delle release di GitLab](https://gitlab.com/lyoneel/cli-tg-notify/-/releases)
+o dalla
+[pagina delle release di GitHub](https://github.com/lyoneel/cli-tg-notify/releases).
 I nomi degli asset seguono lo schema `tg-notify-<os>-<arch>`, ad
 esempio `tg-notify-windows-amd64.exe`, `tg-notify-linux-amd64` o
 `tg-notify-darwin-arm64`.

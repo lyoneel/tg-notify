@@ -84,7 +84,9 @@ text argument becomes the file's caption instead of a message.
 ### Download a release
 
 Grab the binary for your platform from the
-[releases page](https://gitlab.com/lyoneel/cli-tg-notify/-/releases).
+[GitLab releases page](https://gitlab.com/lyoneel/cli-tg-notify/-/releases)
+or the
+[GitHub releases page](https://github.com/lyoneel/cli-tg-notify/releases).
 Asset names follow the `tg-notify-<os>-<arch>` pattern, e.g.
 `tg-notify-windows-amd64.exe`, `tg-notify-linux-amd64`, or
 `tg-notify-darwin-arm64`.
