@@ -29,6 +29,21 @@ Simple to install, simple to use, simple to configure. The binary is
 self-contained with built-in retry handling for rate limits and
 transient failures.
 
+## Agent skills
+
+This project has two agent skills in the public
+[ly-agent-skills](https://gitlab.com/lyoneel/ly-agent-skills) repository
+for driving Telegram notifications from an agent:
+
+- [tg-notify](https://gitlab.com/lyoneel/ly-agent-skills/-/tree/master/tg-notify)
+  wraps this CLI: messages, files, albums, replies, chat-ID discovery,
+  and identity checks.
+- [tg-notipy](https://gitlab.com/lyoneel/ly-agent-skills/-/tree/master/tg-notipy)
+  is the Python sibling. It talks to the Bot API directly from a
+  self-contained stdlib-only script and does not use this CLI. Where
+  features overlap the two are interchangeable; only the CLI adds shell
+  completion and socks5/socks5h proxy support.
+
 ## Examples
 
 Send a message:
