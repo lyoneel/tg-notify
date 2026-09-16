@@ -59,9 +59,27 @@ func (t FileType) Valid() bool {
 // SendFile uploads the local file at path via multipart/form-data and
 // returns the new message ID. The file is streamed, never read fully
 // into memory. silent, when true, delivers without a phone notification.
+// It is a wrapper over SendFileOpts.
 func (b *Bot) SendFile(ctx context.Context, chatID string, t FileType, path, caption, parseMode string, replyTo int64, silent bool) (int64, error) {
+	return b.SendFileOpts(ctx, chatID, t, path, &SendOptions{
+		Caption:   caption,
+		ParseMode: parseMode,
+		ReplyTo:   replyTo,
+		Silent:    silent,
+	})
+}
+
+// SendFileOpts uploads the local file at path via multipart/form-data
+// and returns the new message ID. Nil opts means the Telegram defaults.
+func (b *Bot) SendFileOpts(ctx context.Context, chatID string, t FileType, path string, opts *SendOptions) (int64, error) {
+	if opts == nil {
+		opts = &SendOptions{}
+	}
 	if !t.Valid() {
 		return 0, fmt.Errorf("unknown file type: %s", t)
+	}
+	if err := validateCaption(opts.Caption); err != nil {
+		return 0, err
 	}
 
 	f, err := os.Open(path)
@@ -73,7 +91,7 @@ func (b *Bot) SendFile(ctx context.Context, chatID string, t FileType, path, cap
 	pr, pw := io.Pipe()
 	mw := multipart.NewWriter(pw)
 	go func() {
-		err := writeMultipart(mw, string(t), filepath.Base(path), f, chatID, caption, parseMode, replyTo, silent)
+		err := writeMultipart(mw, string(t), filepath.Base(path), f, chatID, opts)
 		pw.CloseWithError(err)
 	}()
 
@@ -85,7 +103,7 @@ func (b *Bot) SendFile(ctx context.Context, chatID string, t FileType, path, cap
 
 	resp, err := b.uploadClient.Do(req)
 	if err != nil {
-		return 0, err
+		return 0, scrubTokenErr(err)
 	}
 	defer func() { _ = resp.Body.Close() }()
 	raw, err := decodeEnvelope(resp)
@@ -95,26 +113,26 @@ func (b *Bot) SendFile(ctx context.Context, chatID string, t FileType, path, cap
 	return messageIDFrom(raw)
 }
 
-func writeMultipart(mw *multipart.Writer, fieldName, fileName string, file io.Reader, chatID, caption, parseMode string, replyTo int64, silent bool) error {
+func writeMultipart(mw *multipart.Writer, fieldName, fileName string, file io.Reader, chatID string, opts *SendOptions) error {
 	if err := mw.WriteField("chat_id", chatID); err != nil {
 		return err
 	}
-	if caption != "" {
-		if err := mw.WriteField("caption", caption); err != nil {
+	if opts.Caption != "" {
+		if err := mw.WriteField("caption", opts.Caption); err != nil {
 			return err
 		}
 	}
-	if parseMode != "" {
-		if err := mw.WriteField("parse_mode", parseMode); err != nil {
+	if opts.ParseMode != "" {
+		if err := mw.WriteField("parse_mode", opts.ParseMode); err != nil {
 			return err
 		}
 	}
-	if replyTo != 0 {
-		if err := mw.WriteField("reply_to_message_id", strconv.FormatInt(replyTo, 10)); err != nil {
+	if opts.ReplyTo != 0 {
+		if err := mw.WriteField("reply_to_message_id", strconv.FormatInt(opts.ReplyTo, 10)); err != nil {
 			return err
 		}
 	}
-	if silent {
+	if opts.Silent {
 		if err := mw.WriteField("disable_notification", "true"); err != nil {
 			return err
 		}
@@ -130,29 +148,59 @@ func writeMultipart(mw *multipart.Writer, fieldName, fileName string, file io.Re
 }
 
 // SendFileByURL sends a file by URL; Telegram downloads it server-side.
+// It is a wrapper over SendFileByURLOpts.
 func (b *Bot) SendFileByURL(ctx context.Context, chatID string, t FileType, fileURL, caption, parseMode string, replyTo int64, silent bool) (int64, error) {
-	return b.sendFileRef(ctx, chatID, t, fileURL, caption, parseMode, replyTo, silent)
+	return b.SendFileByURLOpts(ctx, chatID, t, fileURL, &SendOptions{
+		Caption:   caption,
+		ParseMode: parseMode,
+		ReplyTo:   replyTo,
+		Silent:    silent,
+	})
+}
+
+// SendFileByURLOpts sends a file by URL; Telegram downloads it
+// server-side. Nil opts means the Telegram defaults.
+func (b *Bot) SendFileByURLOpts(ctx context.Context, chatID string, t FileType, fileURL string, opts *SendOptions) (int64, error) {
+	return b.sendFileRef(ctx, chatID, t, fileURL, opts)
 }
 
 // SendFileByID resends a file already stored on Telegram servers.
+// It is a wrapper over SendFileByIDOpts.
 func (b *Bot) SendFileByID(ctx context.Context, chatID string, t FileType, fileID, caption, parseMode string, replyTo int64, silent bool) (int64, error) {
-	return b.sendFileRef(ctx, chatID, t, fileID, caption, parseMode, replyTo, silent)
+	return b.SendFileByIDOpts(ctx, chatID, t, fileID, &SendOptions{
+		Caption:   caption,
+		ParseMode: parseMode,
+		ReplyTo:   replyTo,
+		Silent:    silent,
+	})
 }
 
-func (b *Bot) sendFileRef(ctx context.Context, chatID string, t FileType, ref, caption, parseMode string, replyTo int64, silent bool) (int64, error) {
+// SendFileByIDOpts resends a file already stored on Telegram servers.
+// Nil opts means the Telegram defaults.
+func (b *Bot) SendFileByIDOpts(ctx context.Context, chatID string, t FileType, fileID string, opts *SendOptions) (int64, error) {
+	return b.sendFileRef(ctx, chatID, t, fileID, opts)
+}
+
+func (b *Bot) sendFileRef(ctx context.Context, chatID string, t FileType, ref string, opts *SendOptions) (int64, error) {
+	if opts == nil {
+		opts = &SendOptions{}
+	}
 	if !t.Valid() {
 		return 0, fmt.Errorf("unknown file type: %s", t)
+	}
+	if err := validateCaption(opts.Caption); err != nil {
+		return 0, err
 	}
 	payload := map[string]string{
 		"chat_id":    chatID,
 		string(t):    ref,
-		"caption":    caption,
-		"parse_mode": parseMode,
+		"caption":    opts.Caption,
+		"parse_mode": opts.ParseMode,
 	}
-	if replyTo != 0 {
-		payload["reply_to_message_id"] = strconv.FormatInt(replyTo, 10)
+	if opts.ReplyTo != 0 {
+		payload["reply_to_message_id"] = strconv.FormatInt(opts.ReplyTo, 10)
 	}
-	if silent {
+	if opts.Silent {
 		payload["disable_notification"] = "true"
 	}
 	clean := make(map[string]string, len(payload))
@@ -183,9 +231,28 @@ type MediaItem struct {
 // applied to the first item. replyTo, when non-zero, makes the album a
 // reply to that message (applied to the first item). silent, when true,
 // delivers without a phone notification (applied to the first item).
+// It is a wrapper over SendMediaGroupOpts.
 func (b *Bot) SendMediaGroup(ctx context.Context, chatID string, items []MediaItem, caption, parseMode string, replyTo int64, silent bool) ([]int64, error) {
+	return b.SendMediaGroupOpts(ctx, chatID, items, &SendOptions{
+		Caption:   caption,
+		ParseMode: parseMode,
+		ReplyTo:   replyTo,
+		Silent:    silent,
+	})
+}
+
+// SendMediaGroupOpts sends a photo/video album (sendMediaGroup) and
+// returns the per-message IDs in order. Nil opts means the Telegram
+// defaults.
+func (b *Bot) SendMediaGroupOpts(ctx context.Context, chatID string, items []MediaItem, opts *SendOptions) ([]int64, error) {
+	if opts == nil {
+		opts = &SendOptions{}
+	}
 	if len(items) < 2 || len(items) > 10 {
 		return nil, fmt.Errorf("album must contain 2-10 items (%d given)", len(items))
+	}
+	if err := validateCaption(opts.Caption); err != nil {
+		return nil, err
 	}
 	remote := allRemote(items)
 	if err := validateMediaItems(items, remote); err != nil {
@@ -200,16 +267,16 @@ func (b *Bot) SendMediaGroup(ctx context.Context, chatID string, items []MediaIt
 		}
 		entry := map[string]string{"type": string(it.Type), "media": ref}
 		if i == 0 {
-			if caption != "" {
-				entry["caption"] = caption
+			if opts.Caption != "" {
+				entry["caption"] = opts.Caption
 			}
-			if parseMode != "" {
-				entry["parse_mode"] = parseMode
+			if opts.ParseMode != "" {
+				entry["parse_mode"] = opts.ParseMode
 			}
-			if replyTo != 0 {
-				entry["reply_to_message_id"] = strconv.FormatInt(replyTo, 10)
+			if opts.ReplyTo != 0 {
+				entry["reply_to_message_id"] = strconv.FormatInt(opts.ReplyTo, 10)
 			}
-			if silent {
+			if opts.Silent {
 				entry["disable_notification"] = "true"
 			}
 		}
@@ -274,7 +341,7 @@ func (b *Bot) SendMediaGroup(ctx context.Context, chatID string, items []MediaIt
 
 	resp, err := b.uploadClient.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, scrubTokenErr(err)
 	}
 	defer func() { _ = resp.Body.Close() }()
 	raw, err := decodeEnvelope(resp)

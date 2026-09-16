@@ -10,10 +10,12 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"regexp"
 	"time"
 
 	"golang.org/x/net/proxy"
@@ -208,13 +210,31 @@ type sendMessageParams struct {
 // parseMode may be empty (plain text), "MarkdownV2", or "HTML".
 // replyTo, when non-zero, makes the message a reply to that message.
 // silent, when true, delivers the message without a phone notification.
+// It is a wrapper over SendMessageOpts.
 func (b *Bot) SendMessage(ctx context.Context, chatID, text, parseMode string, replyTo int64, silent bool) (int64, error) {
+	return b.SendMessageOpts(ctx, chatID, text, &SendOptions{
+		ParseMode: parseMode,
+		ReplyTo:   replyTo,
+		Silent:    silent,
+	})
+}
+
+// SendMessageOpts sends text to chatID and returns the new message
+// ID. Nil opts means the Telegram defaults (plain text, no reply,
+// notifications on).
+func (b *Bot) SendMessageOpts(ctx context.Context, chatID, text string, opts *SendOptions) (int64, error) {
+	if opts == nil {
+		opts = &SendOptions{}
+	}
+	if err := validateText(text); err != nil {
+		return 0, err
+	}
 	raw, err := b.callJSON(ctx, b.jsonClient, "sendMessage", sendMessageParams{
 		ChatID:              chatID,
 		Text:                text,
-		ParseMode:           parseMode,
-		ReplyToMessageID:    replyTo,
-		DisableNotification: silent,
+		ParseMode:           opts.ParseMode,
+		ReplyToMessageID:    opts.ReplyTo,
+		DisableNotification: opts.Silent,
 	})
 	if err != nil {
 		return 0, err
@@ -254,6 +274,26 @@ func (b *Bot) GetUpdates(ctx context.Context, offset int64) ([]Update, error) {
 	return updates, nil
 }
 
+// tokenURLPattern matches the /bot<token>/ segment of Bot API URLs so
+// errors can never carry a raw token.
+var tokenURLPattern = regexp.MustCompile(`/bot[^/\s]+/`)
+
+// scrubTokenErr replaces any bot token embedded in an error's text
+// (a request URL, for example) with a <token> placeholder. The
+// original error value returns unchanged when the text holds no
+// token.
+func scrubTokenErr(err error) error {
+	if err == nil {
+		return nil
+	}
+	msg := err.Error()
+	scrubbed := tokenURLPattern.ReplaceAllString(msg, "/bot<token>/")
+	if scrubbed == msg {
+		return err
+	}
+	return errors.New(scrubbed)
+}
+
 func (b *Bot) callJSON(ctx context.Context, client *http.Client, method string, payload any) (json.RawMessage, error) {
 	body, err := json.Marshal(payload)
 	if err != nil {
@@ -276,7 +316,7 @@ func (b *Bot) call(ctx context.Context, client *http.Client, httpMethod, apiMeth
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, scrubTokenErr(err)
 	}
 	defer func() { _ = resp.Body.Close() }()
 	return decodeEnvelope(resp)
