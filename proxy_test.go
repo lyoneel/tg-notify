@@ -1,9 +1,9 @@
-package telegram_test
+package tgnotify_test
 
 import (
 	"testing"
 
-	"gitlab.com/lyoneel/tgnotify/internal/telegram"
+	"gitlab.com/lyoneel/tgnotify"
 )
 
 func TestSetProxy(t *testing.T) {
@@ -28,7 +28,7 @@ func TestSetProxy(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			bot := telegram.New("TOKEN")
+			bot := tgnotify.New("TOKEN")
 			err := bot.SetProxy(tt.proxyURL)
 			if tt.wantErr {
 				if err == nil {

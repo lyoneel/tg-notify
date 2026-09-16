@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"gitlab.com/lyoneel/tgnotify/internal/telegram"
+	"gitlab.com/lyoneel/tgnotify"
 )
 
 // runWhoami prints the bot's identity, validating the token via getMe.
@@ -13,12 +13,12 @@ func runWhoami(ctx context.Context, opts options) error {
 	if err != nil {
 		return err
 	}
-	bot := telegram.New(token)
+	bot := tgnotify.New(token)
 	if err := configureBot(bot, opts); err != nil {
 		return err
 	}
 
-	user, err := retryWithBackoff(func() (*telegram.User, error) {
+	user, err := retryWithBackoff(func() (*tgnotify.User, error) {
 		return bot.GetMe(ctx)
 	}, opts.noRetry, opts.retries, opts.baseWait)
 	if err != nil {

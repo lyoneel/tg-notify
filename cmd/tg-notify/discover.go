@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"gitlab.com/lyoneel/tgnotify/internal/telegram"
+	"gitlab.com/lyoneel/tgnotify"
 )
 
 func runDiscover(ctx context.Context, opts options) error {
@@ -14,11 +14,11 @@ func runDiscover(ctx context.Context, opts options) error {
 		return err
 	}
 
-	bot := telegram.New(token)
+	bot := tgnotify.New(token)
 	if err := configureBot(bot, opts); err != nil {
 		return err
 	}
-	updates, err := retryWithBackoff(func() ([]telegram.Update, error) {
+	updates, err := retryWithBackoff(func() ([]tgnotify.Update, error) {
 		return bot.GetUpdates(ctx, opts.offset)
 	}, opts.noRetry, opts.retries, opts.baseWait)
 	if err != nil {

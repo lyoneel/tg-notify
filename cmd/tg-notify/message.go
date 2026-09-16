@@ -9,7 +9,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"gitlab.com/lyoneel/tgnotify/internal/telegram"
+	"gitlab.com/lyoneel/tgnotify"
 )
 
 const maxMessageRunes = 4096
@@ -28,7 +28,7 @@ var stdinIsTTY = func() bool {
 	return info.Mode()&os.ModeCharDevice != 0
 }
 
-func newBotFor(opts options) (*telegram.Bot, string, error) {
+func newBotFor(opts options) (*tgnotify.Bot, string, error) {
 	token := resolveToken(opts.token)
 	if token == "" {
 		return nil, "", errors.New("bot token required: use --token or set TELEGRAM_BOT_TOKEN")
@@ -37,7 +37,7 @@ func newBotFor(opts options) (*telegram.Bot, string, error) {
 	if chatID == "" {
 		return nil, "", errors.New("chat ID required: use --chat-id or set TELEGRAM_CHAT_ID")
 	}
-	bot := telegram.New(token)
+	bot := tgnotify.New(token)
 	if err := configureBot(bot, opts); err != nil {
 		return nil, "", err
 	}
@@ -47,7 +47,7 @@ func newBotFor(opts options) (*telegram.Bot, string, error) {
 // configureBot applies the base-URL and proxy overrides to a freshly
 // constructed bot. Any error (invalid proxy URL, in particular) aborts
 // before a network call is made.
-func configureBot(bot *telegram.Bot, opts options) error {
+func configureBot(bot *tgnotify.Bot, opts options) error {
 	if baseURL := resolveBaseURL(opts.baseURL); baseURL != "" {
 		bot.SetBaseURL(baseURL)
 	}

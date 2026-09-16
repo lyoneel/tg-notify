@@ -8,7 +8,7 @@ import (
 	"os"
 	"unicode/utf8"
 
-	"gitlab.com/lyoneel/tgnotify/internal/telegram"
+	"gitlab.com/lyoneel/tgnotify"
 )
 
 // runAlbum sends a photo/video album (sendMediaGroup). Album items come
@@ -35,9 +35,9 @@ func runAlbum(ctx context.Context, opts options, positional []string) error {
 		return err
 	}
 
-	items := make([]telegram.MediaItem, 0, len(refs))
+	items := make([]tgnotify.MediaItem, 0, len(refs))
 	for _, ref := range refs {
-		items = append(items, telegram.MediaItem{
+		items = append(items, tgnotify.MediaItem{
 			Type: detectAlbumType(ref),
 			Ref:  ref,
 		})
@@ -78,7 +78,7 @@ func runAlbum(ctx context.Context, opts options, positional []string) error {
 
 // printDryRunAlbum prints the resolved sendMediaGroup request without
 // sending it. The bot token is never included.
-func printDryRunAlbum(opts options, target string, items []telegram.MediaItem) {
+func printDryRunAlbum(opts options, target string, items []tgnotify.MediaItem) {
 	types := make([]string, len(items))
 	for i, it := range items {
 		types[i] = string(it.Type)
@@ -123,7 +123,7 @@ func albumRefs(flagValues, positional []string) []string {
 
 // validateAlbumFiles stat-checks every local item, rejecting missing
 // paths and directories before any network request is made.
-func validateAlbumFiles(items []telegram.MediaItem) error {
+func validateAlbumFiles(items []tgnotify.MediaItem) error {
 	for _, it := range items {
 		if isRemoteURL(it.Ref) {
 			continue
@@ -143,14 +143,14 @@ func isRemoteURL(ref string) bool {
 // detectAlbumType guesses the album media type for a local path or
 // remote URL. Remote URLs use their path extension when parseable,
 // falling back to photo (the most common album item).
-func detectAlbumType(ref string) telegram.FileType {
+func detectAlbumType(ref string) tgnotify.FileType {
 	path := ref
 	if u, err := url.Parse(ref); err == nil && u.Path != "" {
 		path = u.Path
 	}
-	ft := telegram.DetectType(path)
-	if ft != telegram.TypePhoto && ft != telegram.TypeVideo {
-		return telegram.TypePhoto
+	ft := tgnotify.DetectType(path)
+	if ft != tgnotify.TypePhoto && ft != tgnotify.TypeVideo {
+		return tgnotify.TypePhoto
 	}
 	return ft
 }

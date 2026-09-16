@@ -1,4 +1,4 @@
-package telegram_test
+package tgnotify_test
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"gitlab.com/lyoneel/tgnotify/internal/telegram"
+	"gitlab.com/lyoneel/tgnotify"
 )
 
 func TestSendFileMultipart(t *testing.T) {
@@ -46,7 +46,7 @@ func TestSendFileMultipart(t *testing.T) {
 		_, _ = fmt.Fprint(w, `{"ok":true,"result":{"message_id":7}}`)
 	})
 
-	id, err := bot.SendFile(context.Background(), "123", telegram.TypeDocument, path, "a caption", "HTML", 0, false)
+	id, err := bot.SendFile(context.Background(), "123", tgnotify.TypeDocument, path, "a caption", "HTML", 0, false)
 	if err != nil {
 		t.Fatalf("SendFile: %v", err)
 	}
@@ -104,7 +104,7 @@ func TestSendFileOmitsEmptyOptionals(t *testing.T) {
 		_, _ = fmt.Fprint(w, `{"ok":true,"result":{"message_id":8}}`)
 	})
 
-	if _, err := bot.SendFile(context.Background(), "123", telegram.TypePhoto, path, "", "", 0, false); err != nil {
+	if _, err := bot.SendFile(context.Background(), "123", tgnotify.TypePhoto, path, "", "", 0, false); err != nil {
 		t.Fatalf("SendFile: %v", err)
 	}
 	if captionPresent {
@@ -134,7 +134,7 @@ func TestSendFileReplyTo(t *testing.T) {
 		_, _ = fmt.Fprint(w, `{"ok":true,"result":{"message_id":9}}`)
 	})
 
-	if _, err := bot.SendFile(context.Background(), "123", telegram.TypePhoto, path, "", "", 42, false); err != nil {
+	if _, err := bot.SendFile(context.Background(), "123", tgnotify.TypePhoto, path, "", "", 42, false); err != nil {
 		t.Fatalf("SendFile: %v", err)
 	}
 	if gotReplyTo != "42" {
@@ -173,7 +173,7 @@ func TestSendFileDisableNotification(t *testing.T) {
 				_, _ = fmt.Fprint(w, `{"ok":true,"result":{"message_id":9}}`)
 			})
 
-			if _, err := bot.SendFile(context.Background(), "123", telegram.TypePhoto, path, "", "", 0, tt.silent); err != nil {
+			if _, err := bot.SendFile(context.Background(), "123", tgnotify.TypePhoto, path, "", "", 0, tt.silent); err != nil {
 				t.Fatalf("SendFile: %v", err)
 			}
 			if present != tt.wantKey {
@@ -189,15 +189,15 @@ func TestSendFileDisableNotification(t *testing.T) {
 func TestSendFileRef(t *testing.T) {
 	tests := []struct {
 		name      string
-		send      func(bot *telegram.Bot, ref string) (int64, error)
+		send      func(bot *tgnotify.Bot, ref string) (int64, error)
 		ref       string
 		wantPath  string
 		wantField string
 	}{
 		{
 			name: "by url",
-			send: func(bot *telegram.Bot, ref string) (int64, error) {
-				return bot.SendFileByURL(context.Background(), "123", telegram.TypeDocument, ref, "", "", 0, false)
+			send: func(bot *tgnotify.Bot, ref string) (int64, error) {
+				return bot.SendFileByURL(context.Background(), "123", tgnotify.TypeDocument, ref, "", "", 0, false)
 			},
 			ref:       "https://example.com/report.pdf",
 			wantPath:  "/botTOKEN/sendDocument",
@@ -205,8 +205,8 @@ func TestSendFileRef(t *testing.T) {
 		},
 		{
 			name: "by file id",
-			send: func(bot *telegram.Bot, ref string) (int64, error) {
-				return bot.SendFileByID(context.Background(), "123", telegram.TypePhoto, ref, "cap", "MarkdownV2", 0, false)
+			send: func(bot *tgnotify.Bot, ref string) (int64, error) {
+				return bot.SendFileByID(context.Background(), "123", tgnotify.TypePhoto, ref, "cap", "MarkdownV2", 0, false)
 			},
 			ref:       "AgACAgIAAxk",
 			wantPath:  "/botTOKEN/sendPhoto",
@@ -257,7 +257,7 @@ func TestSendFileRefReplyTo(t *testing.T) {
 		_, _ = fmt.Fprint(w, `{"ok":true,"result":{"message_id":9}}`)
 	})
 
-	if _, err := bot.SendFileByURL(context.Background(), "123", telegram.TypeDocument, "https://example.com/x", "", "", 42, false); err != nil {
+	if _, err := bot.SendFileByURL(context.Background(), "123", tgnotify.TypeDocument, "https://example.com/x", "", "", 42, false); err != nil {
 		t.Fatalf("SendFileByURL: %v", err)
 	}
 	if gotBody["reply_to_message_id"] != "42" {
@@ -284,7 +284,7 @@ func TestSendFileRefDisableNotification(t *testing.T) {
 				_, _ = fmt.Fprint(w, `{"ok":true,"result":{"message_id":9}}`)
 			})
 
-			if _, err := bot.SendFileByURL(context.Background(), "123", telegram.TypeDocument, "https://example.com/x", "", "", 0, tt.silent); err != nil {
+			if _, err := bot.SendFileByURL(context.Background(), "123", tgnotify.TypeDocument, "https://example.com/x", "", "", 0, tt.silent); err != nil {
 				t.Fatalf("SendFileByURL: %v", err)
 			}
 			got, present := gotBody["disable_notification"]
@@ -306,7 +306,7 @@ func TestSendFileRefOmitsReplyTo(t *testing.T) {
 		_, _ = fmt.Fprint(w, `{"ok":true,"result":{"message_id":9}}`)
 	})
 
-	if _, err := bot.SendFileByID(context.Background(), "123", telegram.TypePhoto, "id", "", "", 0, false); err != nil {
+	if _, err := bot.SendFileByID(context.Background(), "123", tgnotify.TypePhoto, "id", "", "", 0, false); err != nil {
 		t.Fatalf("SendFileByID: %v", err)
 	}
 	if _, present := gotBody["reply_to_message_id"]; present {
@@ -316,17 +316,17 @@ func TestSendFileRefOmitsReplyTo(t *testing.T) {
 
 func TestEndpointMapping(t *testing.T) {
 	tests := []struct {
-		fileType telegram.FileType
+		fileType tgnotify.FileType
 		want     string
 	}{
-		{telegram.TypePhoto, "sendPhoto"},
-		{telegram.TypeDocument, "sendDocument"},
-		{telegram.TypeAudio, "sendAudio"},
-		{telegram.TypeVideo, "sendVideo"},
-		{telegram.TypeVoice, "sendVoice"},
-		{telegram.TypeAnimation, "sendAnimation"},
-		{telegram.TypeSticker, "sendSticker"},
-		{telegram.FileType("foo"), ""},
+		{tgnotify.TypePhoto, "sendPhoto"},
+		{tgnotify.TypeDocument, "sendDocument"},
+		{tgnotify.TypeAudio, "sendAudio"},
+		{tgnotify.TypeVideo, "sendVideo"},
+		{tgnotify.TypeVoice, "sendVoice"},
+		{tgnotify.TypeAnimation, "sendAnimation"},
+		{tgnotify.TypeSticker, "sendSticker"},
+		{tgnotify.FileType("foo"), ""},
 	}
 	for _, tt := range tests {
 		t.Run(string(tt.fileType), func(t *testing.T) {
@@ -338,14 +338,14 @@ func TestEndpointMapping(t *testing.T) {
 }
 
 func TestSendFileInvalidType(t *testing.T) {
-	bot := telegram.New("TOKEN")
-	if _, err := bot.SendFile(context.Background(), "123", telegram.FileType("foo"), "/tmp/x", "", "", 0, false); err == nil {
+	bot := tgnotify.New("TOKEN")
+	if _, err := bot.SendFile(context.Background(), "123", tgnotify.FileType("foo"), "/tmp/x", "", "", 0, false); err == nil {
 		t.Error("expected error for unknown type, got nil")
 	}
-	if _, err := bot.SendFileByURL(context.Background(), "123", telegram.FileType("foo"), "https://example.com/x", "", "", 0, false); err == nil {
+	if _, err := bot.SendFileByURL(context.Background(), "123", tgnotify.FileType("foo"), "https://example.com/x", "", "", 0, false); err == nil {
 		t.Error("expected error for unknown type, got nil")
 	}
-	if _, err := bot.SendFileByID(context.Background(), "123", telegram.FileType("foo"), "id", "", "", 0, false); err == nil {
+	if _, err := bot.SendFileByID(context.Background(), "123", tgnotify.FileType("foo"), "id", "", "", 0, false); err == nil {
 		t.Error("expected error for unknown type, got nil")
 	}
 }
@@ -360,9 +360,9 @@ func TestSendMediaGroupRemote(t *testing.T) {
 		_, _ = fmt.Fprint(w, `{"ok":true,"result":[{"message_id":1},{"message_id":2}]}`)
 	})
 
-	items := []telegram.MediaItem{
-		{Type: telegram.TypePhoto, Ref: "https://example.com/a.jpg"},
-		{Type: telegram.TypeVideo, Ref: "https://example.com/b.mp4"},
+	items := []tgnotify.MediaItem{
+		{Type: tgnotify.TypePhoto, Ref: "https://example.com/a.jpg"},
+		{Type: tgnotify.TypeVideo, Ref: "https://example.com/b.mp4"},
 	}
 	ids, err := bot.SendMediaGroup(context.Background(), "123", items, "cap", "HTML", 0, false)
 	if err != nil {
@@ -402,9 +402,9 @@ func TestSendMediaGroupReplyTo(t *testing.T) {
 		_, _ = fmt.Fprint(w, `{"ok":true,"result":[{"message_id":1},{"message_id":2}]}`)
 	})
 
-	items := []telegram.MediaItem{
-		{Type: telegram.TypePhoto, Ref: "https://example.com/a.jpg"},
-		{Type: telegram.TypePhoto, Ref: "https://example.com/b.jpg"},
+	items := []tgnotify.MediaItem{
+		{Type: tgnotify.TypePhoto, Ref: "https://example.com/a.jpg"},
+		{Type: tgnotify.TypePhoto, Ref: "https://example.com/b.jpg"},
 	}
 	if _, err := bot.SendMediaGroup(context.Background(), "123", items, "", "", 42, false); err != nil {
 		t.Fatalf("SendMediaGroup: %v", err)
@@ -429,9 +429,9 @@ func TestSendMediaGroupOmitsReplyTo(t *testing.T) {
 		_, _ = fmt.Fprint(w, `{"ok":true,"result":[{"message_id":1},{"message_id":2}]}`)
 	})
 
-	items := []telegram.MediaItem{
-		{Type: telegram.TypePhoto, Ref: "https://example.com/a.jpg"},
-		{Type: telegram.TypePhoto, Ref: "https://example.com/b.jpg"},
+	items := []tgnotify.MediaItem{
+		{Type: tgnotify.TypePhoto, Ref: "https://example.com/a.jpg"},
+		{Type: tgnotify.TypePhoto, Ref: "https://example.com/b.jpg"},
 	}
 	if _, err := bot.SendMediaGroup(context.Background(), "123", items, "", "", 0, false); err != nil {
 		t.Fatalf("SendMediaGroup: %v", err)
@@ -463,9 +463,9 @@ func TestSendMediaGroupDisableNotification(t *testing.T) {
 				_, _ = fmt.Fprint(w, `{"ok":true,"result":[{"message_id":1},{"message_id":2}]}`)
 			})
 
-			items := []telegram.MediaItem{
-				{Type: telegram.TypePhoto, Ref: "https://example.com/a.jpg"},
-				{Type: telegram.TypePhoto, Ref: "https://example.com/b.jpg"},
+			items := []tgnotify.MediaItem{
+				{Type: tgnotify.TypePhoto, Ref: "https://example.com/a.jpg"},
+				{Type: tgnotify.TypePhoto, Ref: "https://example.com/b.jpg"},
 			}
 			if _, err := bot.SendMediaGroup(context.Background(), "123", items, "", "", 0, tt.silent); err != nil {
 				t.Fatalf("SendMediaGroup: %v", err)
@@ -510,9 +510,9 @@ func TestSendMediaGroupLocal(t *testing.T) {
 		_, _ = fmt.Fprint(w, `{"ok":true,"result":[{"message_id":10},{"message_id":11}]}`)
 	})
 
-	items := []telegram.MediaItem{
-		{Type: telegram.TypePhoto, Ref: a},
-		{Type: telegram.TypePhoto, Ref: b},
+	items := []tgnotify.MediaItem{
+		{Type: tgnotify.TypePhoto, Ref: a},
+		{Type: tgnotify.TypePhoto, Ref: b},
 	}
 	if _, err := bot.SendMediaGroup(context.Background(), "123", items, "", "", 0, false); err != nil {
 		t.Fatalf("SendMediaGroup: %v", err)
@@ -526,24 +526,24 @@ func TestSendMediaGroupLocal(t *testing.T) {
 }
 
 func TestSendMediaGroupValidation(t *testing.T) {
-	bot := telegram.New("TOKEN")
+	bot := tgnotify.New("TOKEN")
 
-	_, err := bot.SendMediaGroup(context.Background(), "123", []telegram.MediaItem{{Type: telegram.TypePhoto, Ref: "a.jpg"}}, "", "", 0, false)
+	_, err := bot.SendMediaGroup(context.Background(), "123", []tgnotify.MediaItem{{Type: tgnotify.TypePhoto, Ref: "a.jpg"}}, "", "", 0, false)
 	if err == nil {
 		t.Error("expected error for single item, got nil")
 	}
 
-	_, err = bot.SendMediaGroup(context.Background(), "123", []telegram.MediaItem{
-		{Type: telegram.TypeDocument, Ref: "a.pdf"},
-		{Type: telegram.TypePhoto, Ref: "b.jpg"},
+	_, err = bot.SendMediaGroup(context.Background(), "123", []tgnotify.MediaItem{
+		{Type: tgnotify.TypeDocument, Ref: "a.pdf"},
+		{Type: tgnotify.TypePhoto, Ref: "b.jpg"},
 	}, "", "", 0, false)
 	if err == nil {
 		t.Error("expected error for non photo/video item, got nil")
 	}
 
-	_, err = bot.SendMediaGroup(context.Background(), "123", []telegram.MediaItem{
-		{Type: telegram.TypePhoto, Ref: "a.jpg"},
-		{Type: telegram.TypePhoto, Ref: "https://example.com/b.jpg"},
+	_, err = bot.SendMediaGroup(context.Background(), "123", []tgnotify.MediaItem{
+		{Type: tgnotify.TypePhoto, Ref: "a.jpg"},
+		{Type: tgnotify.TypePhoto, Ref: "https://example.com/b.jpg"},
 	}, "", "", 0, false)
 	if err == nil {
 		t.Error("expected error for mixed local/remote, got nil")

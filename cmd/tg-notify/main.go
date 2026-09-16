@@ -18,7 +18,7 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.com/lyoneel/tgnotify/internal/telegram"
+	"gitlab.com/lyoneel/tgnotify"
 )
 
 // version can be injected at build time:
@@ -428,7 +428,7 @@ func retryWithBackoff[T any](send func() (T, error), noRetry bool, maxRetries in
 		return val, err
 	}
 
-	var apiErr *telegram.APIError
+	var apiErr *tgnotify.APIError
 	if errors.As(err, &apiErr) && apiErr.Code == http.StatusTooManyRequests {
 		wait := apiErr.RetryAfter
 		if wait <= 0 {
@@ -451,7 +451,7 @@ func retryWithBackoff[T any](send func() (T, error), noRetry bool, maxRetries in
 		if err == nil {
 			return val, nil
 		}
-		var apiErr429 *telegram.APIError
+		var apiErr429 *tgnotify.APIError
 		if errors.As(err, &apiErr429) && apiErr429.Code == http.StatusTooManyRequests {
 			wait := apiErr429.RetryAfter
 			if wait <= 0 {
@@ -476,7 +476,7 @@ func retryWithBackoff[T any](send func() (T, error), noRetry bool, maxRetries in
 // (missing files, permissions) are deliberately excluded so a bad local
 // path fails fast instead of exhausting the retry budget.
 func transient(err error) bool {
-	var apiErr *telegram.APIError
+	var apiErr *tgnotify.APIError
 	if errors.As(err, &apiErr) {
 		return apiErr.Code >= 500 && apiErr.Code <= 599
 	}

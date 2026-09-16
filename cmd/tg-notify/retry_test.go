@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"gitlab.com/lyoneel/tgnotify/internal/telegram"
+	"gitlab.com/lyoneel/tgnotify"
 )
 
 // connRefused is a net.Error that is not a timeout.
@@ -29,7 +29,7 @@ var _ net.Error = netTimeout{}
 
 func TestRetryWithBackoff(t *testing.T) {
 	apiErr := func(code, retryAfter int) error {
-		return &telegram.APIError{Code: code, Description: "x", RetryAfter: retryAfter}
+		return &tgnotify.APIError{Code: code, Description: "x", RetryAfter: retryAfter}
 	}
 
 	tests := []struct {
@@ -252,12 +252,12 @@ func TestTransient(t *testing.T) {
 		err  error
 		want bool
 	}{
-		{name: "429 not transient", err: &telegram.APIError{Code: 429}, want: false},
-		{name: "499 not transient", err: &telegram.APIError{Code: 499}, want: false},
-		{name: "500 transient", err: &telegram.APIError{Code: 500}, want: true},
-		{name: "502 transient", err: &telegram.APIError{Code: 502}, want: true},
-		{name: "599 transient", err: &telegram.APIError{Code: 599}, want: true},
-		{name: "404 not transient", err: &telegram.APIError{Code: 404}, want: false},
+		{name: "429 not transient", err: &tgnotify.APIError{Code: 429}, want: false},
+		{name: "499 not transient", err: &tgnotify.APIError{Code: 499}, want: false},
+		{name: "500 transient", err: &tgnotify.APIError{Code: 500}, want: true},
+		{name: "502 transient", err: &tgnotify.APIError{Code: 502}, want: true},
+		{name: "599 transient", err: &tgnotify.APIError{Code: 599}, want: true},
+		{name: "404 not transient", err: &tgnotify.APIError{Code: 404}, want: false},
 		{name: "connection refused transient", err: connRefused{}, want: true},
 		{name: "timeout transient", err: netTimeout{}, want: true},
 		{name: "plain error not transient", err: errors.New("boom"), want: false},

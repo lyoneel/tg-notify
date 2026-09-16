@@ -1,4 +1,4 @@
-package telegram_test
+package tgnotify_test
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"gitlab.com/lyoneel/tgnotify/internal/telegram"
+	"gitlab.com/lyoneel/tgnotify"
 	"gitlab.com/lyoneel/tgnotify/internal/testproxy"
 )
 
@@ -81,7 +81,7 @@ func TestProxyRoutingHTTP(t *testing.T) {
 	api := newFakeAPI(t)
 	proxySrv, rec := testproxy.NewHTTPProxy(t)
 
-	bot := telegram.New("TOKEN")
+	bot := tgnotify.New("TOKEN")
 	bot.SetBaseURL(api.URL())
 	if err := bot.SetProxy(proxySrv.URL()); err != nil {
 		t.Fatalf("SetProxy: %v", err)
@@ -129,7 +129,7 @@ func TestProxyRoutingUpload(t *testing.T) {
 	api := newFakeAPI(t)
 	proxySrv, rec := testproxy.NewHTTPProxy(t)
 
-	bot := telegram.New("TOKEN")
+	bot := tgnotify.New("TOKEN")
 	bot.SetBaseURL(api.URL())
 	if err := bot.SetProxy(proxySrv.URL()); err != nil {
 		t.Fatalf("SetProxy: %v", err)
@@ -141,7 +141,7 @@ func TestProxyRoutingUpload(t *testing.T) {
 		t.Fatalf("write temp file: %v", err)
 	}
 
-	id, err := bot.SendFile(context.Background(), "123", telegram.TypeDocument, filePath, "a caption", "", 0, false)
+	id, err := bot.SendFile(context.Background(), "123", tgnotify.TypeDocument, filePath, "a caption", "", 0, false)
 	if err != nil {
 		t.Fatalf("SendFile: %v", err)
 	}
@@ -172,7 +172,7 @@ func TestProxyRoutingGetMe(t *testing.T) {
 	api := newFakeAPI(t)
 	proxySrv, rec := testproxy.NewHTTPProxy(t)
 
-	bot := telegram.New("TOKEN")
+	bot := tgnotify.New("TOKEN")
 	bot.SetBaseURL(api.URL())
 	if err := bot.SetProxy(proxySrv.URL()); err != nil {
 		t.Fatalf("SetProxy: %v", err)
@@ -202,7 +202,7 @@ func TestProxyRoutingTLSWithSeam(t *testing.T) {
 	api := newFakeAPI(t)
 	proxySrv, rec, caPEM := testproxy.NewHTTPSProxy(t)
 
-	bot := telegram.New("TOKEN")
+	bot := tgnotify.New("TOKEN")
 	bot.SetBaseURL(api.URL())
 	if err := bot.SetProxyTLSRootCAs(caPEM); err != nil {
 		t.Fatalf("SetProxyTLSRootCAs: %v", err)
@@ -230,7 +230,7 @@ func TestProxyRoutingTLSTrustedAfterSetProxy(t *testing.T) {
 	api := newFakeAPI(t)
 	proxySrv, _, caPEM := testproxy.NewHTTPSProxy(t)
 
-	bot := telegram.New("TOKEN")
+	bot := tgnotify.New("TOKEN")
 	bot.SetBaseURL(api.URL())
 	if err := bot.SetProxy(proxySrv.URL()); err != nil {
 		t.Fatalf("SetProxy: %v", err)
@@ -249,7 +249,7 @@ func TestProxyRoutingTLSUntrusted(t *testing.T) {
 	api := newFakeAPI(t)
 	proxySrv, _, _ := testproxy.NewHTTPSProxy(t)
 
-	bot := telegram.New("TOKEN")
+	bot := tgnotify.New("TOKEN")
 	bot.SetBaseURL(api.URL())
 	if err := bot.SetProxy(proxySrv.URL()); err != nil {
 		t.Fatalf("SetProxy: %v", err)
@@ -268,7 +268,7 @@ func TestProxyRoutingTLSUntrusted(t *testing.T) {
 }
 
 func TestSetProxyTLSRootCAsRejectsBadPEM(t *testing.T) {
-	bot := telegram.New("TOKEN")
+	bot := tgnotify.New("TOKEN")
 	if err := bot.SetProxyTLSRootCAs([]byte("not a certificate")); err == nil {
 		t.Fatalf("SetProxyTLSRootCAs with garbage PEM = nil, want error")
 	}
@@ -280,7 +280,7 @@ func TestProxyRoutingSOCKS5(t *testing.T) {
 	apiHost, apiPort := api.HostPort(t)
 	proxySrv, rec := testproxy.NewSOCKS5Proxy(t)
 
-	bot := telegram.New("TOKEN")
+	bot := tgnotify.New("TOKEN")
 	bot.SetBaseURL(api.URL())
 	if err := bot.SetProxy("socks5://" + proxySrv.Addr()); err != nil {
 		t.Fatalf("SetProxy: %v", err)
@@ -332,7 +332,7 @@ func TestProxyRoutingSOCKS5WithAuth(t *testing.T) {
 	api := newFakeAPI(t)
 	proxySrv, rec := testproxy.NewSOCKS5Proxy(t, testproxy.WithUserPass("socksuser", "sockspass"))
 
-	bot := telegram.New("TOKEN")
+	bot := tgnotify.New("TOKEN")
 	bot.SetBaseURL(api.URL())
 	if err := bot.SetProxy(proxySrv.URLWithAuth("socksuser", "sockspass")); err != nil {
 		t.Fatalf("SetProxy: %v", err)
@@ -361,7 +361,7 @@ func TestProxyRoutingSOCKS5hEquivalent(t *testing.T) {
 	apiHost, apiPort := api.HostPort(t)
 	proxySrv, rec := testproxy.NewSOCKS5Proxy(t)
 
-	bot := telegram.New("TOKEN")
+	bot := tgnotify.New("TOKEN")
 	bot.SetBaseURL(api.URL())
 	if err := bot.SetProxy("socks5h://" + proxySrv.Addr()); err != nil {
 		t.Fatalf("SetProxy: %v", err)
@@ -389,7 +389,7 @@ func TestNoProxyControl(t *testing.T) {
 	api := newFakeAPI(t)
 	proxySrv, rec := testproxy.NewHTTPProxy(t)
 
-	bot := telegram.New("TOKEN")
+	bot := tgnotify.New("TOKEN")
 	bot.SetBaseURL(api.URL())
 	_ = proxySrv
 
@@ -409,7 +409,7 @@ func TestSetProxyEmptyReset(t *testing.T) {
 	api := newFakeAPI(t)
 	proxySrv, rec := testproxy.NewHTTPProxy(t)
 
-	bot := telegram.New("TOKEN")
+	bot := tgnotify.New("TOKEN")
 	bot.SetBaseURL(api.URL())
 	if err := bot.SetProxy(proxySrv.URL()); err != nil {
 		t.Fatalf("SetProxy: %v", err)

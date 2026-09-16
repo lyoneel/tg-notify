@@ -1,11 +1,13 @@
-# AGENTS.md — Ly CLI Telegram Notify
+# AGENTS.md — Ly Telegram Notify
 
 ## What it is
 
-Go CLI that sends Telegram messages and files via the Bot API using a
-self-contained client (one external dependency: golang.org/x/net/proxy
-for SOCKS5 proxy support).
-Project type: application (CLI).
+Go CLI plus Go library that sends Telegram messages and files via the
+Bot API using a self-contained client (one external dependency:
+golang.org/x/net/proxy for SOCKS5 proxy support).
+The library lives in the root package `tgnotify`; the binary stays
+under `cmd/tg-notify`.
+Project type: application (CLI) plus library.
 
 ## Commands
 
@@ -78,7 +80,7 @@ cmd/tg-notify/whoami.go   # whoami mode (getMe)
 cmd/tg-notify/discover.go # discover-chat-id mode (getUpdates)
 cmd/tg-notify/completion.go # shell completion (bash, zsh, fish)
 cmd/tg-notify/dotenv.go   # optional ./.env loading
-internal/telegram # Bot API client: client.go, files.go, filetype.go + tests
+client.go, files.go, filetype.go # Bot API client (package tgnotify, repository root) + tests
 internal/testproxy # stdlib recording HTTP/TLS/SOCKS5 proxies for the proxy e2e tests
 e2e/compose/      # Docker Compose proxy smoke stack; make e2e-docker
 Makefile          # build/run/test/e2e-docker/quality targets (see make help)

@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"testing"
 
-	"gitlab.com/lyoneel/tgnotify/internal/telegram"
+	"gitlab.com/lyoneel/tgnotify"
 )
 
 func TestAlbumRefs(t *testing.T) {
@@ -50,16 +50,16 @@ func TestDetectAlbumType(t *testing.T) {
 	tests := []struct {
 		name string
 		ref  string
-		want telegram.FileType
+		want tgnotify.FileType
 	}{
-		{name: "local jpg", ref: "a.jpg", want: telegram.TypePhoto},
-		{name: "local mp4", ref: "b.mp4", want: telegram.TypeVideo},
-		{name: "remote jpg", ref: "https://example.com/a.jpg", want: telegram.TypePhoto},
-		{name: "remote mp4 with query", ref: "https://example.com/b.mp4?x=1", want: telegram.TypeVideo},
-		{name: "unknown extension falls back to photo", ref: "a.pdf", want: telegram.TypePhoto},
-		{name: "remote no extension falls back to photo", ref: "https://example.com/x", want: telegram.TypePhoto},
-		{name: "uppercase extension", ref: "a.JPG", want: telegram.TypePhoto},
-		{name: "mkv video", ref: "clip.mkv", want: telegram.TypeVideo},
+		{name: "local jpg", ref: "a.jpg", want: tgnotify.TypePhoto},
+		{name: "local mp4", ref: "b.mp4", want: tgnotify.TypeVideo},
+		{name: "remote jpg", ref: "https://example.com/a.jpg", want: tgnotify.TypePhoto},
+		{name: "remote mp4 with query", ref: "https://example.com/b.mp4?x=1", want: tgnotify.TypeVideo},
+		{name: "unknown extension falls back to photo", ref: "a.pdf", want: tgnotify.TypePhoto},
+		{name: "remote no extension falls back to photo", ref: "https://example.com/x", want: tgnotify.TypePhoto},
+		{name: "uppercase extension", ref: "a.JPG", want: tgnotify.TypePhoto},
+		{name: "mkv video", ref: "clip.mkv", want: tgnotify.TypeVideo},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -121,9 +121,9 @@ func TestValidateAlbumFiles(t *testing.T) {
 	}
 
 	t.Run("all present and remote passes", func(t *testing.T) {
-		items := []telegram.MediaItem{
-			{Type: telegram.TypePhoto, Ref: good},
-			{Type: telegram.TypePhoto, Ref: "https://example.com/b.jpg"},
+		items := []tgnotify.MediaItem{
+			{Type: tgnotify.TypePhoto, Ref: good},
+			{Type: tgnotify.TypePhoto, Ref: "https://example.com/b.jpg"},
 		}
 		if err := validateAlbumFiles(items); err != nil {
 			t.Errorf("validateAlbumFiles = %v, want nil", err)
@@ -131,9 +131,9 @@ func TestValidateAlbumFiles(t *testing.T) {
 	})
 
 	t.Run("missing local file errors", func(t *testing.T) {
-		items := []telegram.MediaItem{
-			{Type: telegram.TypePhoto, Ref: filepath.Join(tempDir, "missing.jpg")},
-			{Type: telegram.TypePhoto, Ref: "https://example.com/b.jpg"},
+		items := []tgnotify.MediaItem{
+			{Type: tgnotify.TypePhoto, Ref: filepath.Join(tempDir, "missing.jpg")},
+			{Type: tgnotify.TypePhoto, Ref: "https://example.com/b.jpg"},
 		}
 		if err := validateAlbumFiles(items); err == nil {
 			t.Error("expected error for missing file, got nil")
@@ -141,9 +141,9 @@ func TestValidateAlbumFiles(t *testing.T) {
 	})
 
 	t.Run("directory errors", func(t *testing.T) {
-		items := []telegram.MediaItem{
-			{Type: telegram.TypePhoto, Ref: tempDir},
-			{Type: telegram.TypePhoto, Ref: "https://example.com/b.jpg"},
+		items := []tgnotify.MediaItem{
+			{Type: tgnotify.TypePhoto, Ref: tempDir},
+			{Type: tgnotify.TypePhoto, Ref: "https://example.com/b.jpg"},
 		}
 		if err := validateAlbumFiles(items); err == nil {
 			t.Error("expected error for directory, got nil")

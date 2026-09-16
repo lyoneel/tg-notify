@@ -2,7 +2,7 @@
 // only the Go standard library. It covers the endpoints needed by the
 // tg-notify CLI: sendMessage, getUpdates, and the file-sending methods
 // (sendPhoto, sendDocument, sendAudio, sendVideo, sendVoice).
-package telegram
+package tgnotify
 
 import (
 	"bytes"

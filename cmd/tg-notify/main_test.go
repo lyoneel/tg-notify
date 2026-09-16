@@ -115,8 +115,8 @@ func TestScrubSecrets(t *testing.T) {
 	}{
 		{
 			name: "token in url",
-			in:   `Post "https://api.telegram.org/bot12345:ABC-xyz/sendMessage": timeout`,
-			want: `Post "https://api.telegram.org/bot<token>/sendMessage": timeout`,
+			in:   `Post "https://api.tgnotify.org/bot12345:ABC-xyz/sendMessage": timeout`,
+			want: `Post "https://api.tgnotify.org/bot<token>/sendMessage": timeout`,
 		},
 		{
 			name: "no token untouched",

@@ -1,4 +1,4 @@
-package telegram_test
+package tgnotify_test
 
 import (
 	"context"
@@ -10,14 +10,14 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"gitlab.com/lyoneel/tgnotify/internal/telegram"
+	"gitlab.com/lyoneel/tgnotify"
 )
 
-func newTestServer(t *testing.T, handler http.HandlerFunc) (*telegram.Bot, *httptest.Server) {
+func newTestServer(t *testing.T, handler http.HandlerFunc) (*tgnotify.Bot, *httptest.Server) {
 	t.Helper()
 	server := httptest.NewServer(handler)
 	t.Cleanup(server.Close)
-	bot := telegram.New("TOKEN")
+	bot := tgnotify.New("TOKEN")
 	bot.SetBaseURL(server.URL)
 	return bot, server
 }
@@ -121,9 +121,9 @@ func TestSendMessageAPIError(t *testing.T) {
 			})
 
 			_, err := bot.SendMessage(context.Background(), "123", "hello", "", 0, false)
-			var apiErr *telegram.APIError
+			var apiErr *tgnotify.APIError
 			if !errors.As(err, &apiErr) {
-				t.Fatalf("error = %v, want *telegram.APIError", err)
+				t.Fatalf("error = %v, want *tgnotify.APIError", err)
 			}
 			if apiErr.Code != tt.wantCode {
 				t.Errorf("Code = %d, want %d", apiErr.Code, tt.wantCode)
@@ -165,7 +165,7 @@ func TestSendMessageMalformedResponses(t *testing.T) {
 			if err == nil {
 				t.Fatal("expected error, got nil")
 			}
-			var apiErr *telegram.APIError
+			var apiErr *tgnotify.APIError
 			gotAPI := errors.As(err, &apiErr)
 			if gotAPI != tt.wantAPI {
 				t.Fatalf("errors.As(err, *APIError) = %v, want %v (err = %v)", gotAPI, tt.wantAPI, err)

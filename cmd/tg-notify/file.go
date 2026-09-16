@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"unicode/utf8"
 
-	"gitlab.com/lyoneel/tgnotify/internal/telegram"
+	"gitlab.com/lyoneel/tgnotify"
 )
 
 const maxCaptionRunes = 1024
@@ -40,7 +40,7 @@ func runFile(ctx context.Context, opts options, positional []string) error {
 	if opts.fileID != "" && opts.fileType == "" {
 		return errors.New("--file-id requires --type (cannot auto-detect type from file_id)")
 	}
-	if opts.fileType != "" && !telegram.FileType(opts.fileType).Valid() {
+	if opts.fileType != "" && !tgnotify.FileType(opts.fileType).Valid() {
 		return fmt.Errorf("unknown file type: %s", opts.fileType)
 	}
 
@@ -63,9 +63,9 @@ func runFile(ctx context.Context, opts options, positional []string) error {
 		}
 		id, err = sendLocalFile(ctx, bot, target, opts, opts.filePath, opts.fileType, opts.caption, opts.parseMode, opts.replyTo)
 	case opts.fileURL != "":
-		ft := telegram.TypeDocument
+		ft := tgnotify.TypeDocument
 		if opts.fileType != "" {
-			ft = telegram.FileType(opts.fileType)
+			ft = tgnotify.FileType(opts.fileType)
 		}
 		if opts.dryRun {
 			printDryRunFile(opts, target, "url", opts.fileURL, string(ft))
@@ -76,7 +76,7 @@ func runFile(ctx context.Context, opts options, positional []string) error {
 			return bot.SendFileByURL(ctx, target, ft, opts.fileURL, opts.caption, opts.parseMode, opts.replyTo, opts.silent)
 		}, opts.noRetry, opts.retries, opts.baseWait)
 	default:
-		ft := telegram.FileType(opts.fileType)
+		ft := tgnotify.FileType(opts.fileType)
 		if opts.dryRun {
 			printDryRunFile(opts, target, "file_id", opts.fileID, string(ft))
 			return nil
@@ -117,18 +117,18 @@ func printDryRunFile(opts options, target, sourceKind, source, fileType string) 
 	fmt.Println()
 }
 
-func sendLocalFile(ctx context.Context, bot *telegram.Bot, chatID string, opts options, path, fileTypeFlag, caption, parseMode string, replyTo int64) (int64, error) {
+func sendLocalFile(ctx context.Context, bot *tgnotify.Bot, chatID string, opts options, path, fileTypeFlag, caption, parseMode string, replyTo int64) (int64, error) {
 	info, err := os.Stat(path)
 	if err != nil || info.IsDir() {
 		return 0, fmt.Errorf("file not found: %s", path)
 	}
 
-	ft := telegram.FileType(fileTypeFlag)
+	ft := tgnotify.FileType(fileTypeFlag)
 	if fileTypeFlag == "" {
-		ft = telegram.DetectType(path)
+		ft = tgnotify.DetectType(path)
 	}
 	size := info.Size()
-	maxSize := telegram.MaxUploadSizeFor(ft, opts.baseURL != "")
+	maxSize := tgnotify.MaxUploadSizeFor(ft, opts.baseURL != "")
 	if size > maxSize {
 		return 0, fmt.Errorf("file too large (%.1f MB, max %.0f MB for %s)",
 			float64(size)/(1024*1024), float64(maxSize)/(1024*1024), ft)

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"gitlab.com/lyoneel/tgnotify/internal/telegram"
+	"gitlab.com/lyoneel/tgnotify"
 )
 
 func TestCompletionFlagsContainsNewFlags(t *testing.T) {
@@ -102,7 +102,7 @@ func TestLoadDotEnvDoesNotOverrideExisting(t *testing.T) {
 func TestMaxUploadSizeForUsedByLocalFile(t *testing.T) {
 	// Guard: the self-hosted path raises the limit. The function itself
 	// is covered by telegram tests; here just confirm the wiring value.
-	if got := telegram.MaxUploadSizeFor(telegram.TypePhoto, true); got != 2000*1024*1024 {
+	if got := tgnotify.MaxUploadSizeFor(tgnotify.TypePhoto, true); got != 2000*1024*1024 {
 		t.Errorf("self-hosted photo limit = %d, want 2000 MB", got)
 	}
 }
