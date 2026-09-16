@@ -16,6 +16,37 @@ Releases use the date-build scheme:
 - `vMAJOR.MINOR.YYYYMMDD`: stable release; no suffix, supersedes the
   prereleases of that date.
 
+## Unreleased
+
+### Added
+
+- Go library: the Bot API client is now the importable root package
+  `tgnotify` (previously `internal/telegram`), with an options-style
+  send API (`SendOptions`, `NewSendOptions` with `WithParseMode`,
+  `WithReplyTo`, `WithSilent`, `WithCaption`) alongside the positional
+  methods, and `Opts` variants for every send method
+  (`SendMessageOpts`, `SendFileOpts`, `SendFileByURLOpts`,
+  `SendFileByIDOpts`, `SendMediaGroupOpts`).
+- Library retry policy (`RetryPolicy`, `SetRetryPolicy`): enabled by
+  default with the CLI values (60 transient retries, 2s base wait,
+  429 `retry_after` honored), progress routed through an injectable
+  `Logger`, silent by default.
+- `FromEnv` resolves `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`,
+  `TELEGRAM_BASE_URL`, and `TELEGRAM_PROXY` into a ready bot and chat
+  ID.
+- Client-side payload limits (`MaxMessageRunes` 4096,
+  `MaxCaptionRunes` 1024) and token scrubbing on transport errors.
+- Godoc `Example` functions for the three send styles.
+
+### Changed
+
+- Repository and module renamed from `cli-tg-notify` to `tgnotify`;
+  the install line is now
+  `go install gitlab.com/lyoneel/tgnotify/cmd/tg-notify@latest`.
+- The CLI retry handling now runs through the library policy; flags
+  `--no-retry`, `--retries`, and `--base-wait` keep their exact
+  behavior and output.
+
 ## v1.1.20260825
 
 ### Added

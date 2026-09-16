@@ -178,6 +178,58 @@ group IDs (e.g. `-1001234567890`) work. No config file: set these once
 in your shell profile (`~/.bashrc`, `~/.zshrc`) or pass them as flags
 per invocation.
 
+## Use as a Go library
+
+The same client that powers the CLI is importable. The package is
+`tgnotify` at the repository root:
+
+```bash
+go get gitlab.com/lyoneel/tgnotify
+```
+
+Minimal send (three lines of setup):
+
+```go
+import "gitlab.com/lyoneel/tgnotify"
+
+bot := tgnotify.New("123456:ABC-TOKEN")
+id, err := bot.SendMessageOpts(context.Background(), "123456789", "deploy finished", nil)
+```
+
+Every send method has three equivalent forms: the positional classic
+(`SendMessage(ctx, chatID, text, parseMode, replyTo, silent)`), the
+options struct (`SendMessageOpts(ctx, chatID, text, *SendOptions)`),
+and functional options through a constructor
+(`SendMessageOpts(ctx, chatID, text, tgnotify.NewSendOptions(
+tgnotify.WithParseMode("HTML"), tgnotify.WithSilent()))`). All three
+share one send core, so they cannot drift. `nil` or a zero
+`SendOptions` means the Telegram defaults; `SendOptions` also carries
+`Caption` for the file and album methods
+(`SendFileOpts`, `SendFileByURLOpts`, `SendFileByIDOpts`,
+`SendMediaGroupOpts`).
+
+Retries are on by default with the CLI values (60 transient retries,
+2s base wait, 429 `retry_after` honored). Tune them per bot:
+
+```go
+bot.SetRetryPolicy(tgnotify.RetryPolicy{
+	MaxRetries: 3,
+	BaseWait:   2 * time.Second,
+	Logger:     log.Printf, // nil keeps retries silent
+})
+```
+
+The library enforces the Telegram payload limits client-side
+(`MaxMessageRunes` 4096, `MaxCaptionRunes` 1024), never prints a bot
+token in an error, and never writes to stderr unless you attach a
+`Logger`. To configure from the environment instead of literals, use
+`tgnotify.FromEnv()`; it reads `TELEGRAM_BOT_TOKEN`,
+`TELEGRAM_CHAT_ID`, `TELEGRAM_BASE_URL`, and `TELEGRAM_PROXY` and
+returns a ready bot plus the chat ID.
+
+See the `Example` functions in the package documentation
+(pkg.go.dev/gitlab.com/lyoneel/tgnotify) for runnable shapes.
+
 ## Advanced
 
 ### Usage

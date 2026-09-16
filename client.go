@@ -1,7 +1,12 @@
-// Package telegram implements a minimal Telegram Bot API client using
-// only the Go standard library. It covers the endpoints needed by the
-// tg-notify CLI: sendMessage, getUpdates, and the file-sending methods
-// (sendPhoto, sendDocument, sendAudio, sendVideo, sendVoice).
+// Package tgnotify implements a minimal Telegram Bot API client using
+// only the Go standard library. It covers sendMessage, getUpdates,
+// getMe, and the file-sending methods (sendPhoto, sendDocument,
+// sendAudio, sendVideo, sendVoice, sendAnimation, sendSticker), plus
+// sendMediaGroup for albums. The same client powers the tg-notify CLI
+// and is importable as a library: create a Bot with New (or FromEnv),
+// tune the retry behavior with SetRetryPolicy, and send with any of
+// the three equivalent call styles (positional, SendOptions struct,
+// functional options).
 package tgnotify
 
 import (
