@@ -1,9 +1,13 @@
 package tgnotify
 
 import (
+	"context"
 	"errors"
+	"io"
+	"mime/multipart"
 	"net"
 	"os"
+	"strings"
 	"testing"
 	"time"
 )
@@ -300,5 +304,62 @@ func TestApplyRetryRejectsInvalidPolicy(t *testing.T) {
 	policy := RetryPolicy{MaxRetries: 3, BaseWait: 0}
 	if _, err := applyRetry(policy, func() (int64, error) { return 1, nil }); err == nil {
 		t.Fatal("zero base wait with retries enabled must fail fast")
+	}
+}
+
+func TestScrubTokenErrNoMatch(t *testing.T) {
+	plain := errors.New("plain error")
+	if scrubTokenErr(plain) != plain {
+		t.Fatal("errors without tokens must pass through unchanged")
+	}
+	if scrubTokenErr(nil) != nil {
+		t.Fatal("nil must pass through")
+	}
+	scrubbed := scrubTokenErr(errors.New("POST https://api.telegram.org/botSECRET/sendMessage: refused"))
+	if strings.Contains(scrubbed.Error(), "SECRET") {
+		t.Fatalf("scrubbed error still carries the token: %s", scrubbed)
+	}
+}
+
+func TestCallJSONMarshalError(t *testing.T) {
+	bot := New("t")
+	if _, err := bot.callJSON(context.Background(), bot.jsonClient, "sendMessage", make(chan int)); err == nil {
+		t.Fatal("unmarshalable payload must fail")
+	}
+}
+
+func TestSendMessageOptsTextValidationRunsBeforeRetry(t *testing.T) {
+	bot := New("t")
+	bot.SetRetryPolicy(RetryPolicy{Disabled: false, MaxRetries: 3, BaseWait: time.Second})
+	if _, err := bot.SendMessageOpts(context.Background(), "1", "", nil); err == nil {
+		t.Fatal("empty message must fail client-side even with retries enabled")
+	}
+}
+
+func TestWriteMultipartBrokenPipe(t *testing.T) {
+	pr, pw := io.Pipe()
+	_ = pr.Close()
+	mw := multipart.NewWriter(pw)
+	err := writeMultipart(mw, "document", "x.txt", strings.NewReader("d"), "1", &SendOptions{
+		Caption: "c", ParseMode: "HTML", ReplyTo: 2, Silent: true,
+	})
+	if err == nil {
+		t.Fatal("writing fields to a closed pipe must fail")
+	}
+}
+
+func TestGetMeTransportError(t *testing.T) {
+	l, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("listen: %v", err)
+	}
+	addr := l.Addr().String()
+	_ = l.Close()
+
+	bot := New("t")
+	bot.SetBaseURL("http://" + addr)
+	bot.SetRetryPolicy(RetryPolicy{Disabled: true})
+	if _, err := bot.GetMe(context.Background()); err == nil {
+		t.Fatal("connection refused must fail GetMe")
 	}
 }
