@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"gitlab.com/lyoneel/cli-tg-notify/internal/testproxy"
+	"gitlab.com/lyoneel/tgnotify/internal/testproxy"
 )
 
 var (

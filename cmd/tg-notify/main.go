@@ -18,7 +18,7 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.com/lyoneel/cli-tg-notify/internal/telegram"
+	"gitlab.com/lyoneel/tgnotify/internal/telegram"
 )
 
 // version can be injected at build time:

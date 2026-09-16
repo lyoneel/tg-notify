@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"gitlab.com/lyoneel/cli-tg-notify/internal/telegram"
+	"gitlab.com/lyoneel/tgnotify/internal/telegram"
 )
 
 // runWhoami prints the bot's identity, validating the token via getMe.

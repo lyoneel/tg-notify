@@ -3,7 +3,7 @@ package telegram_test
 import (
 	"testing"
 
-	"gitlab.com/lyoneel/cli-tg-notify/internal/telegram"
+	"gitlab.com/lyoneel/tgnotify/internal/telegram"
 )
 
 func TestDetectType(t *testing.T) {

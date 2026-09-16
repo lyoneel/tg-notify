@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"unicode/utf8"
 
-	"gitlab.com/lyoneel/cli-tg-notify/internal/telegram"
+	"gitlab.com/lyoneel/tgnotify/internal/telegram"
 )
 
 const maxCaptionRunes = 1024

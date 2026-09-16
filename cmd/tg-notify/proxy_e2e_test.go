@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"gitlab.com/lyoneel/cli-tg-notify/internal/testproxy"
+	"gitlab.com/lyoneel/tgnotify/internal/testproxy"
 )
 
 // proxyEnvVars are every environment variable that can route traffic

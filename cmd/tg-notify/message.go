@@ -9,7 +9,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"gitlab.com/lyoneel/cli-tg-notify/internal/telegram"
+	"gitlab.com/lyoneel/tgnotify/internal/telegram"
 )
 
 const maxMessageRunes = 4096

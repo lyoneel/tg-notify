@@ -9,7 +9,7 @@ description: Go CLI for sending Telegram messages and files via the Bot API
 
 **English** | [Español](README.es.md) | [Italiano](README.it.md) | [Português](README.pt.md)
 
-> **Main repository**: https://gitlab.com/lyoneel/cli-tg-notify.
+> **Main repository**: https://gitlab.com/lyoneel/tgnotify.
 > If you are reading this on any other host, it is a mirror. Please
 > open issues and merge requests on GitLab.
 
@@ -99,9 +99,9 @@ text argument becomes the file's caption instead of a message.
 ### Download a release
 
 Grab the binary for your platform from the
-[GitLab releases page](https://gitlab.com/lyoneel/cli-tg-notify/-/releases)
+[GitLab releases page](https://gitlab.com/lyoneel/tgnotify/-/releases)
 or the
-[GitHub releases page](https://github.com/lyoneel/cli-tg-notify/releases).
+[GitHub releases page](https://github.com/lyoneel/tgnotify/releases).
 Asset names follow the `tg-notify-<os>-<arch>` pattern, e.g.
 `tg-notify-windows-amd64.exe`, `tg-notify-linux-amd64`, or
 `tg-notify-darwin-arm64`.
@@ -139,7 +139,7 @@ Make sure `~/bin` (or whichever directory you choose) is on `PATH`.
 ### go install
 
 ```bash
-go install gitlab.com/lyoneel/cli-tg-notify/cmd/tg-notify@latest
+go install gitlab.com/lyoneel/tgnotify/cmd/tg-notify@latest
 ```
 
 The binary lands in `$(go env GOPATH)/bin` (make sure that directory
@@ -148,8 +148,8 @@ is on `PATH`).
 ### Build from source
 
 ```bash
-git clone https://gitlab.com/lyoneel/cli-tg-notify.git
-cd cli-tg-notify
+git clone https://gitlab.com/lyoneel/tgnotify.git
+cd tgnotify
 make build          # or: go build -o ./build/tg-notify ./cmd/tg-notify
 ```
 

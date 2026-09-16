@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"gitlab.com/lyoneel/cli-tg-notify/internal/telegram"
+	"gitlab.com/lyoneel/tgnotify/internal/telegram"
 )
 
 func TestSendFileMultipart(t *testing.T) {

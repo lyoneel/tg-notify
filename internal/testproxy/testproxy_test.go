@@ -16,7 +16,7 @@ import (
 
 	"golang.org/x/net/proxy"
 
-	"gitlab.com/lyoneel/cli-tg-notify/internal/testproxy"
+	"gitlab.com/lyoneel/tgnotify/internal/testproxy"
 )
 
 // scrubProxyEnv neutralises ambient proxy environment variables so

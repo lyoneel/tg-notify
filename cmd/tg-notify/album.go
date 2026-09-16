@@ -8,7 +8,7 @@ import (
 	"os"
 	"unicode/utf8"
 
-	"gitlab.com/lyoneel/cli-tg-notify/internal/telegram"
+	"gitlab.com/lyoneel/tgnotify/internal/telegram"
 )
 
 // runAlbum sends a photo/video album (sendMediaGroup). Album items come
