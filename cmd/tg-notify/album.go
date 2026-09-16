@@ -54,9 +54,7 @@ func runAlbum(ctx context.Context, opts options, positional []string) error {
 		return nil
 	}
 
-	ids, err := retryWithBackoff(func() ([]int64, error) {
-		return bot.SendMediaGroup(ctx, target, items, opts.caption, opts.parseMode, opts.replyTo, opts.silent)
-	}, opts.noRetry, opts.retries, opts.baseWait)
+	ids, err := bot.SendMediaGroup(ctx, target, items, opts.caption, opts.parseMode, opts.replyTo, opts.silent)
 	if err != nil {
 		return err
 	}

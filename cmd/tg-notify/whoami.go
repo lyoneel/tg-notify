@@ -18,9 +18,7 @@ func runWhoami(ctx context.Context, opts options) error {
 		return err
 	}
 
-	user, err := retryWithBackoff(func() (*tgnotify.User, error) {
-		return bot.GetMe(ctx)
-	}, opts.noRetry, opts.retries, opts.baseWait)
+	user, err := bot.GetMe(ctx)
 	if err != nil {
 		return err
 	}

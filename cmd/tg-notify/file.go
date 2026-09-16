@@ -72,9 +72,7 @@ func runFile(ctx context.Context, opts options, positional []string) error {
 			return nil
 		}
 		fmt.Fprintf(os.Stderr, "Sending %s by URL: %s...\n", ft, opts.fileURL)
-		id, err = retryWithBackoff(func() (int64, error) {
-			return bot.SendFileByURL(ctx, target, ft, opts.fileURL, opts.caption, opts.parseMode, opts.replyTo, opts.silent)
-		}, opts.noRetry, opts.retries, opts.baseWait)
+		id, err = bot.SendFileByURL(ctx, target, ft, opts.fileURL, opts.caption, opts.parseMode, opts.replyTo, opts.silent)
 	default:
 		ft := tgnotify.FileType(opts.fileType)
 		if opts.dryRun {
@@ -82,9 +80,7 @@ func runFile(ctx context.Context, opts options, positional []string) error {
 			return nil
 		}
 		fmt.Fprintf(os.Stderr, "Resending %s by file_id: %s...\n", ft, opts.fileID)
-		id, err = retryWithBackoff(func() (int64, error) {
-			return bot.SendFileByID(ctx, target, ft, opts.fileID, opts.caption, opts.parseMode, opts.replyTo, opts.silent)
-		}, opts.noRetry, opts.retries, opts.baseWait)
+		id, err = bot.SendFileByID(ctx, target, ft, opts.fileID, opts.caption, opts.parseMode, opts.replyTo, opts.silent)
 	}
 	if err != nil {
 		return err
@@ -135,7 +131,5 @@ func sendLocalFile(ctx context.Context, bot *tgnotify.Bot, chatID string, opts o
 	}
 	fmt.Fprintf(os.Stderr, "Sending %s: %s (%.1f MB)...\n", ft, filepath.Base(path), float64(size)/(1024*1024))
 
-	return retryWithBackoff(func() (int64, error) {
-		return bot.SendFile(ctx, chatID, ft, path, caption, parseMode, replyTo, opts.silent)
-	}, opts.noRetry, opts.retries, opts.baseWait)
+	return bot.SendFile(ctx, chatID, ft, path, caption, parseMode, replyTo, opts.silent)
 }

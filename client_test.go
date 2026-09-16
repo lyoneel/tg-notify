@@ -19,6 +19,9 @@ func newTestServer(t *testing.T, handler http.HandlerFunc) (*tgnotify.Bot, *http
 	t.Cleanup(server.Close)
 	bot := tgnotify.New("TOKEN")
 	bot.SetBaseURL(server.URL)
+	// Server tests assert single-request semantics; the retry policy
+	// has its own dedicated tests.
+	bot.SetRetryPolicy(tgnotify.RetryPolicy{Disabled: true})
 	return bot, server
 }
 

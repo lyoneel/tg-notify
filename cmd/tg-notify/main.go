@@ -8,17 +8,11 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/fs"
-	"math/rand"
-	"net"
-	"net/http"
 	"os"
 	"regexp"
 	"runtime/debug"
 	"strings"
 	"time"
-
-	"gitlab.com/lyoneel/tgnotify"
 )
 
 // version can be injected at build time:
@@ -411,113 +405,3 @@ func printResult(jsonOut bool, id int64) {
 	}
 	fmt.Printf("Sent (message_id: %d)\n", id)
 }
-
-// retryWithBackoff runs send and applies the retry policy. A 429
-// rate-limit API error waits retry_after seconds (default 5) and
-// retries exactly once. Transient errors (5xx APIError, net.Error)
-// retry up to maxRetries times with exponential backoff (baseWait
-// doubled per attempt, capped at maxTransientWait, ±25% jitter).
-// Every other error returns immediately. noRetry disables all of it;
-// maxRetries == 0 disables transient retries only.
-func retryWithBackoff[T any](send func() (T, error), noRetry bool, maxRetries int, baseWait time.Duration) (T, error) {
-	val, err := send()
-	if err == nil {
-		return val, nil
-	}
-	if noRetry {
-		return val, err
-	}
-
-	var apiErr *tgnotify.APIError
-	if errors.As(err, &apiErr) && apiErr.Code == http.StatusTooManyRequests {
-		wait := apiErr.RetryAfter
-		if wait <= 0 {
-			wait = 5
-		}
-		fmt.Fprintf(os.Stderr, "Rate limited. Retrying after %ds...\n", wait)
-		sleep(time.Duration(wait) * time.Second)
-		return send()
-	}
-
-	if !transient(err) {
-		return val, err
-	}
-
-	for attempt := 1; attempt <= maxRetries; attempt++ {
-		wait := backoffWait(attempt, baseWait)
-		fmt.Fprintf(os.Stderr, "Transient error (%v). Retry %d/%d in %s...\n", err, attempt, maxRetries, wait)
-		sleep(wait)
-		val, err = send()
-		if err == nil {
-			return val, nil
-		}
-		var apiErr429 *tgnotify.APIError
-		if errors.As(err, &apiErr429) && apiErr429.Code == http.StatusTooManyRequests {
-			wait := apiErr429.RetryAfter
-			if wait <= 0 {
-				wait = 5
-			}
-			fmt.Fprintf(os.Stderr, "Rate limited. Retrying after %ds...\n", wait)
-			sleep(time.Duration(wait) * time.Second)
-			val, err = send()
-			if err == nil {
-				return val, nil
-			}
-		}
-		if !transient(err) {
-			return val, err
-		}
-	}
-	return val, err
-}
-
-// transient reports whether err is a retryable transient failure: an
-// APIError with a 5xx code or a network-level error. Filesystem errors
-// (missing files, permissions) are deliberately excluded so a bad local
-// path fails fast instead of exhausting the retry budget.
-func transient(err error) bool {
-	var apiErr *tgnotify.APIError
-	if errors.As(err, &apiErr) {
-		return apiErr.Code >= 500 && apiErr.Code <= 599
-	}
-	var pathErr *fs.PathError
-	if errors.As(err, &pathErr) {
-		return false
-	}
-	var netErr net.Error
-	return errors.As(err, &netErr)
-}
-
-// schedule constants for the transient backoff: factor, per-wait cap,
-// and jitter fraction are fixed; count and base wait via flags.
-const (
-	waitFactor       = 2
-	maxTransientWait = 60 * time.Second
-	jitterFraction   = 0.25
-)
-
-// backoffWait computes the jittered wait for a 1-based attempt number:
-// the uncapped backoff is jittered by ±jitterFraction.
-func backoffWait(attempt int, baseWait time.Duration) time.Duration {
-	wait := uncappedWait(attempt, baseWait)
-	jitter := float64(wait) * jitterFraction
-	offset := rand.Float64()*2*jitter - jitter
-	return time.Duration(float64(wait) + offset)
-}
-
-// uncappedWait computes the pre-jitter backoff for a 1-based attempt:
-// baseWait * waitFactor^(attempt-1), capped at maxTransientWait.
-func uncappedWait(attempt int, baseWait time.Duration) time.Duration {
-	wait := baseWait
-	for i := 1; i < attempt; i++ {
-		wait *= waitFactor
-		if wait >= maxTransientWait {
-			wait = maxTransientWait
-			break
-		}
-	}
-	return wait
-}
-
-// sleep is indirection for time.Sleep so tests can replace it.
-var sleep = time.Sleep

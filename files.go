@@ -82,35 +82,37 @@ func (b *Bot) SendFileOpts(ctx context.Context, chatID string, t FileType, path 
 		return 0, err
 	}
 
-	f, err := os.Open(path)
-	if err != nil {
-		return 0, err
-	}
-	defer func() { _ = f.Close() }()
+	return applyRetry(b.retryPolicy, func() (int64, error) {
+		f, err := os.Open(path)
+		if err != nil {
+			return 0, err
+		}
+		defer func() { _ = f.Close() }()
 
-	pr, pw := io.Pipe()
-	mw := multipart.NewWriter(pw)
-	go func() {
-		err := writeMultipart(mw, string(t), filepath.Base(path), f, chatID, opts)
-		pw.CloseWithError(err)
-	}()
+		pr, pw := io.Pipe()
+		mw := multipart.NewWriter(pw)
+		go func() {
+			err := writeMultipart(mw, string(t), filepath.Base(path), f, chatID, opts)
+			pw.CloseWithError(err)
+		}()
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, b.url(t.Endpoint()), pr)
-	if err != nil {
-		return 0, err
-	}
-	req.Header.Set("Content-Type", mw.FormDataContentType())
+		req, err := http.NewRequestWithContext(ctx, http.MethodPost, b.url(t.Endpoint()), pr)
+		if err != nil {
+			return 0, err
+		}
+		req.Header.Set("Content-Type", mw.FormDataContentType())
 
-	resp, err := b.uploadClient.Do(req)
-	if err != nil {
-		return 0, scrubTokenErr(err)
-	}
-	defer func() { _ = resp.Body.Close() }()
-	raw, err := decodeEnvelope(resp)
-	if err != nil {
-		return 0, err
-	}
-	return messageIDFrom(raw)
+		resp, err := b.uploadClient.Do(req)
+		if err != nil {
+			return 0, scrubTokenErr(err)
+		}
+		defer func() { _ = resp.Body.Close() }()
+		raw, err := decodeEnvelope(resp)
+		if err != nil {
+			return 0, err
+		}
+		return messageIDFrom(raw)
+	})
 }
 
 func writeMultipart(mw *multipart.Writer, fieldName, fileName string, file io.Reader, chatID string, opts *SendOptions) error {
@@ -209,11 +211,13 @@ func (b *Bot) sendFileRef(ctx context.Context, chatID string, t FileType, ref st
 			clean[k] = v
 		}
 	}
-	raw, err := b.callJSON(ctx, b.fileJSONClient, t.Endpoint(), clean)
-	if err != nil {
-		return 0, err
-	}
-	return messageIDFrom(raw)
+	return applyRetry(b.retryPolicy, func() (int64, error) {
+		raw, err := b.callJSON(ctx, b.fileJSONClient, t.Endpoint(), clean)
+		if err != nil {
+			return 0, err
+		}
+		return messageIDFrom(raw)
+	})
 }
 
 // MediaItem is one item of an album (sendMediaGroup): a photo or
@@ -284,6 +288,12 @@ func (b *Bot) SendMediaGroupOpts(ctx context.Context, chatID string, items []Med
 	}
 	payload := map[string]any{"chat_id": chatID, "media": media}
 
+	return applyRetry(b.retryPolicy, func() ([]int64, error) {
+		return b.sendMediaGroupPayload(ctx, chatID, payload, items, remote)
+	})
+}
+
+func (b *Bot) sendMediaGroupPayload(ctx context.Context, chatID string, payload map[string]any, items []MediaItem, remote bool) ([]int64, error) {
 	if remote {
 		raw, err := b.callJSON(ctx, b.fileJSONClient, "sendMediaGroup", payload)
 		if err != nil {

@@ -166,6 +166,7 @@ func TestClientScrubsTokenInTransportErrors(t *testing.T) {
 
 	bot := tgnotify.New("SECRET-TOKEN-123")
 	bot.SetBaseURL("http://" + addr)
+	bot.SetRetryPolicy(tgnotify.RetryPolicy{Disabled: true})
 	if _, err := bot.SendMessageOpts(context.Background(), "1", "hi", nil); err == nil {
 		t.Fatal("expected transport error")
 	} else if strings.Contains(err.Error(), "SECRET-TOKEN-123") {

@@ -45,8 +45,9 @@ func newBotFor(opts options) (*tgnotify.Bot, string, error) {
 }
 
 // configureBot applies the base-URL and proxy overrides to a freshly
-// constructed bot. Any error (invalid proxy URL, in particular) aborts
-// before a network call is made.
+// constructed bot and installs the retry policy from the flags. Any
+// error (invalid proxy URL, in particular) aborts before a network
+// call is made.
 func configureBot(bot *tgnotify.Bot, opts options) error {
 	if baseURL := resolveBaseURL(opts.baseURL); baseURL != "" {
 		bot.SetBaseURL(baseURL)
@@ -56,7 +57,19 @@ func configureBot(bot *tgnotify.Bot, opts options) error {
 			return err
 		}
 	}
+	bot.SetRetryPolicy(tgnotify.RetryPolicy{
+		Disabled:   opts.noRetry,
+		MaxRetries: opts.retries,
+		BaseWait:   opts.baseWait,
+		Logger:     logToStderr,
+	})
 	return nil
+}
+
+// logToStderr prints retry progress lines to stderr in the same format
+// the CLI printed before the retry policy moved into the library.
+var logToStderr = func(format string, args ...any) {
+	fmt.Fprintf(os.Stderr, format, args...)
 }
 
 func runMessage(ctx context.Context, opts options, positional []string) error {
@@ -98,9 +111,7 @@ func runMessage(ctx context.Context, opts options, positional []string) error {
 		return nil
 	}
 
-	id, err := retryWithBackoff(func() (int64, error) {
-		return bot.SendMessage(ctx, target, text, opts.parseMode, opts.replyTo, opts.silent)
-	}, opts.noRetry, opts.retries, opts.baseWait)
+	id, err := bot.SendMessage(ctx, target, text, opts.parseMode, opts.replyTo, opts.silent)
 	if err != nil {
 		return err
 	}

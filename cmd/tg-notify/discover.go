@@ -18,9 +18,7 @@ func runDiscover(ctx context.Context, opts options) error {
 	if err := configureBot(bot, opts); err != nil {
 		return err
 	}
-	updates, err := retryWithBackoff(func() ([]tgnotify.Update, error) {
-		return bot.GetUpdates(ctx, opts.offset)
-	}, opts.noRetry, opts.retries, opts.baseWait)
+	updates, err := bot.GetUpdates(ctx, opts.offset)
 	if err != nil {
 		return err
 	}

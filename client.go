@@ -44,9 +44,13 @@ type Bot struct {
 	uploadClient   *http.Client
 
 	proxyRootCAs *x509.CertPool
+
+	retryPolicy RetryPolicy
 }
 
 // New creates a Bot for the given token against the production API.
+// The bot starts with the default retry policy (see DefaultRetryPolicy):
+// enabled, 60 transient retries, 2s base wait, silent.
 func New(token string) *Bot {
 	return &Bot{
 		token:          token,
@@ -54,7 +58,20 @@ func New(token string) *Bot {
 		jsonClient:     &http.Client{Timeout: jsonTimeout},
 		fileJSONClient: &http.Client{Timeout: fileJSONTimeout},
 		uploadClient:   &http.Client{Timeout: uploadTimeout},
+		retryPolicy:    DefaultRetryPolicy(),
 	}
+}
+
+// SetRetryPolicy installs p as the retry policy for every send and
+// read method of this bot. The default policy comes from
+// DefaultRetryPolicy; pass a policy with Disabled set to retry never.
+func (b *Bot) SetRetryPolicy(p RetryPolicy) {
+	b.retryPolicy = p
+}
+
+// RetryPolicy returns the bot's current retry policy.
+func (b *Bot) RetryPolicy() RetryPolicy {
+	return b.retryPolicy
 }
 
 // SetBaseURL overrides the API base URL; intended for tests and for
@@ -229,49 +246,55 @@ func (b *Bot) SendMessageOpts(ctx context.Context, chatID, text string, opts *Se
 	if err := validateText(text); err != nil {
 		return 0, err
 	}
-	raw, err := b.callJSON(ctx, b.jsonClient, "sendMessage", sendMessageParams{
-		ChatID:              chatID,
-		Text:                text,
-		ParseMode:           opts.ParseMode,
-		ReplyToMessageID:    opts.ReplyTo,
-		DisableNotification: opts.Silent,
+	return applyRetry(b.retryPolicy, func() (int64, error) {
+		raw, err := b.callJSON(ctx, b.jsonClient, "sendMessage", sendMessageParams{
+			ChatID:              chatID,
+			Text:                text,
+			ParseMode:           opts.ParseMode,
+			ReplyToMessageID:    opts.ReplyTo,
+			DisableNotification: opts.Silent,
+		})
+		if err != nil {
+			return 0, err
+		}
+		return messageIDFrom(raw)
 	})
-	if err != nil {
-		return 0, err
-	}
-	return messageIDFrom(raw)
 }
 
 // GetMe returns the bot's own user record, used to validate a token.
 func (b *Bot) GetMe(ctx context.Context) (*User, error) {
-	raw, err := b.call(ctx, b.jsonClient, http.MethodGet, "getMe", nil)
-	if err != nil {
-		return nil, err
-	}
-	var user User
-	if err := json.Unmarshal(raw, &user); err != nil {
-		return nil, fmt.Errorf("unexpected getMe result: %w", err)
-	}
-	return &user, nil
+	return applyRetry(b.retryPolicy, func() (*User, error) {
+		raw, err := b.call(ctx, b.jsonClient, http.MethodGet, "getMe", nil)
+		if err != nil {
+			return nil, err
+		}
+		var user User
+		if err := json.Unmarshal(raw, &user); err != nil {
+			return nil, fmt.Errorf("unexpected getMe result: %w", err)
+		}
+		return &user, nil
+	})
 }
 
 // GetUpdates returns pending updates for the bot, oldest first.
 // offset, when positive, skips updates with an ID less than or equal
 // to it, so callers can page past updates they have already seen.
 func (b *Bot) GetUpdates(ctx context.Context, offset int64) ([]Update, error) {
-	method := "getUpdates"
-	if offset > 0 {
-		method = fmt.Sprintf("getUpdates?offset=%d", offset)
-	}
-	raw, err := b.call(ctx, b.jsonClient, http.MethodGet, method, nil)
-	if err != nil {
-		return nil, err
-	}
-	var updates []Update
-	if err := json.Unmarshal(raw, &updates); err != nil {
-		return nil, fmt.Errorf("unexpected getUpdates result: %w", err)
-	}
-	return updates, nil
+	return applyRetry(b.retryPolicy, func() ([]Update, error) {
+		method := "getUpdates"
+		if offset > 0 {
+			method = fmt.Sprintf("getUpdates?offset=%d", offset)
+		}
+		raw, err := b.call(ctx, b.jsonClient, http.MethodGet, method, nil)
+		if err != nil {
+			return nil, err
+		}
+		var updates []Update
+		if err := json.Unmarshal(raw, &updates); err != nil {
+			return nil, fmt.Errorf("unexpected getUpdates result: %w", err)
+		}
+		return updates, nil
+	})
 }
 
 // tokenURLPattern matches the /bot<token>/ segment of Bot API URLs so
