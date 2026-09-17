@@ -16,6 +16,14 @@ Releases use the date-build scheme:
 - `vMAJOR.MINOR.YYYYMMDD`: stable release; no suffix, supersedes the
   prereleases of that date.
 
+## Unreleased
+
+### Changed
+
+- Repository renamed to `tg-notify` on both GitLab and GitHub; the
+  module path is `gitlab.com/lyoneel/tg-notify` and the install line
+  stays `go install gitlab.com/lyoneel/tg-notify/cmd/tg-notify@latest`.
+
 ## v1.3.20260916
 
 ### Added
@@ -40,7 +48,7 @@ Releases use the date-build scheme:
 
 ### Changed
 
-- Repository and module renamed from `cli-tg-notify` to `tgnotify`;
+- Repository and module renamed to the then-current `tgnotify` slug;
   the install line is now
   `go install gitlab.com/lyoneel/tg-notify/cmd/tg-notify@latest`.
 - The CLI retry handling now runs through the library policy; flags
@@ -101,8 +109,8 @@ Releases use the date-build scheme:
 ### Changed
 
 - Repository moved to GitLab as the primary host: module path is now
-  `gitlab.com/lyoneel/cli-tg-notify`, so the tool installs with
-  `go install gitlab.com/lyoneel/cli-tg-notify/cmd/tg-notify@latest`.
+  `gitlab.com/lyoneel/tg-notify`, so the tool installs with
+  `go install gitlab.com/lyoneel/tg-notify/cmd/tg-notify@latest`.
   `golang.org/x/net/proxy` is the first external dependency, added for
   SOCKS5 proxy support.
 - The CLI now retries up to 60 times with exponential backoff and
