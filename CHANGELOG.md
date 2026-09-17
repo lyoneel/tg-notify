@@ -1,6 +1,6 @@
 ---
-version: 1.3.20260916
-last-updated: 2026-09-16
+version: 1.4.20260917
+last-updated: 2026-09-17
 title: Changelog
 description: Release history for tg-notify
 ---
@@ -16,13 +16,19 @@ Releases use the date-build scheme:
 - `vMAJOR.MINOR.YYYYMMDD`: stable release; no suffix, supersedes the
   prereleases of that date.
 
-## Unreleased
+## v1.4.20260917
 
 ### Changed
 
 - Repository renamed to `tg-notify` on both GitLab and GitHub; the
   module path is `gitlab.com/lyoneel/tg-notify` and the install line
   stays `go install gitlab.com/lyoneel/tg-notify/cmd/tg-notify@latest`.
+
+### Fixed
+
+- The v1.3.20260916 tag still declared the superseded `tgnotify`
+  module path, so `go install ...@latest` failed with a module path
+  mismatch; this release publishes the renamed path.
 
 ## v1.3.20260916
 
