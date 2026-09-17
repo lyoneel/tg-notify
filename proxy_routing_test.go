@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"gitlab.com/lyoneel/tgnotify"
-	"gitlab.com/lyoneel/tgnotify/internal/testproxy"
+	"gitlab.com/lyoneel/tg-notify"
+	"gitlab.com/lyoneel/tg-notify/internal/testproxy"
 )
 
 // scrubProxyEnv neutralises ambient proxy environment variables so

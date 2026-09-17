@@ -8,7 +8,7 @@ import (
 	"os"
 	"unicode/utf8"
 
-	"gitlab.com/lyoneel/tgnotify"
+	"gitlab.com/lyoneel/tg-notify"
 )
 
 // runAlbum sends a photo/video album (sendMediaGroup). Album items come

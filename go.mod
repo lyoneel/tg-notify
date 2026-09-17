@@ -1,4 +1,4 @@
-module gitlab.com/lyoneel/tgnotify
+module gitlab.com/lyoneel/tg-notify
 
 go 1.24.0
 

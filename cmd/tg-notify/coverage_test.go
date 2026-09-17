@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"gitlab.com/lyoneel/tgnotify"
+	"gitlab.com/lyoneel/tg-notify"
 )
 
 // captureOutput swaps os.Stdout for a pipe (the e2e files already

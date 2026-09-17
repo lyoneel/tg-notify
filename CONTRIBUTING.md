@@ -14,8 +14,8 @@ Requirements:
 Clone and build:
 
 ```bash
-git clone https://gitlab.com/lyoneel/tgnotify.git
-cd tgnotify
+git clone https://gitlab.com/lyoneel/tg-notify.git
+cd tg-notify
 make build
 ```
 

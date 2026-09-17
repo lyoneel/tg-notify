@@ -9,7 +9,7 @@ description: Go CLI for sending Telegram messages and files via the Bot API
 
 **English** | [Español](README.es.md) | [Italiano](README.it.md) | [Português](README.pt.md)
 
-> **Main repository**: https://gitlab.com/lyoneel/tgnotify.
+> **Main repository**: https://gitlab.com/lyoneel/tg-notify.
 > If you are reading this on any other host, it is a mirror. Please
 > open issues and merge requests on GitLab.
 
@@ -99,9 +99,9 @@ text argument becomes the file's caption instead of a message.
 ### Download a release
 
 Grab the binary for your platform from the
-[GitLab releases page](https://gitlab.com/lyoneel/tgnotify/-/releases)
+[GitLab releases page](https://gitlab.com/lyoneel/tg-notify/-/releases)
 or the
-[GitHub releases page](https://github.com/lyoneel/tgnotify/releases).
+[GitHub releases page](https://github.com/lyoneel/tg-notify/releases).
 Asset names follow the `tg-notify-<os>-<arch>` pattern, e.g.
 `tg-notify-windows-amd64.exe`, `tg-notify-linux-amd64`, or
 `tg-notify-darwin-arm64`.
@@ -139,7 +139,7 @@ Make sure `~/bin` (or whichever directory you choose) is on `PATH`.
 ### go install
 
 ```bash
-go install gitlab.com/lyoneel/tgnotify/cmd/tg-notify@latest
+go install gitlab.com/lyoneel/tg-notify/cmd/tg-notify@latest
 ```
 
 The binary lands in `$(go env GOPATH)/bin` (make sure that directory
@@ -148,8 +148,8 @@ is on `PATH`).
 ### Build from source
 
 ```bash
-git clone https://gitlab.com/lyoneel/tgnotify.git
-cd tgnotify
+git clone https://gitlab.com/lyoneel/tg-notify.git
+cd tg-notify
 make build          # or: go build -o ./build/tg-notify ./cmd/tg-notify
 ```
 
@@ -184,13 +184,13 @@ The same client that powers the CLI is importable. The package is
 `tgnotify` at the repository root:
 
 ```bash
-go get gitlab.com/lyoneel/tgnotify
+go get gitlab.com/lyoneel/tg-notify
 ```
 
 Minimal send (three lines of setup):
 
 ```go
-import "gitlab.com/lyoneel/tgnotify"
+import "gitlab.com/lyoneel/tg-notify"
 
 bot := tgnotify.New("123456:ABC-TOKEN")
 id, err := bot.SendMessageOpts(context.Background(), "123456789", "deploy finished", nil)
@@ -228,7 +228,7 @@ token in an error, and never writes to stderr unless you attach a
 returns a ready bot plus the chat ID.
 
 See the `Example` functions in the package documentation
-(pkg.go.dev/gitlab.com/lyoneel/tgnotify) for runnable shapes.
+(pkg.go.dev/gitlab.com/lyoneel/tg-notify) for runnable shapes.
 
 ## Advanced
 

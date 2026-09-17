@@ -9,7 +9,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"gitlab.com/lyoneel/tgnotify"
+	"gitlab.com/lyoneel/tg-notify"
 )
 
 const maxMessageRunes = 4096

@@ -13,7 +13,7 @@ import (
 	"strings"
 	"testing"
 
-	"gitlab.com/lyoneel/tgnotify"
+	"gitlab.com/lyoneel/tg-notify"
 )
 
 // capture returns a handler that records the request path and the

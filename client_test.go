@@ -10,7 +10,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"gitlab.com/lyoneel/tgnotify"
+	"gitlab.com/lyoneel/tg-notify"
 )
 
 func newTestServer(t *testing.T, handler http.HandlerFunc) (*tgnotify.Bot, *httptest.Server) {

@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"testing"
 
-	"gitlab.com/lyoneel/tgnotify"
+	"gitlab.com/lyoneel/tg-notify"
 )
 
 func TestAlbumRefs(t *testing.T) {

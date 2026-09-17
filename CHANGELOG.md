@@ -42,7 +42,7 @@ Releases use the date-build scheme:
 
 - Repository and module renamed from `cli-tg-notify` to `tgnotify`;
   the install line is now
-  `go install gitlab.com/lyoneel/tgnotify/cmd/tg-notify@latest`.
+  `go install gitlab.com/lyoneel/tg-notify/cmd/tg-notify@latest`.
 - The CLI retry handling now runs through the library policy; flags
   `--no-retry`, `--retries`, and `--base-wait` keep their exact
   behavior and output.

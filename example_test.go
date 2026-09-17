@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"gitlab.com/lyoneel/tgnotify"
+	"gitlab.com/lyoneel/tg-notify"
 )
 
 // The options-struct style: build the options value, then send.

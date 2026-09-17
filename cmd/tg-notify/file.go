@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"unicode/utf8"
 
-	"gitlab.com/lyoneel/tgnotify"
+	"gitlab.com/lyoneel/tg-notify"
 )
 
 const maxCaptionRunes = 1024

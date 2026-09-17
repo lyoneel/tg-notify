@@ -3,7 +3,7 @@ package tgnotify_test
 import (
 	"testing"
 
-	"gitlab.com/lyoneel/tgnotify"
+	"gitlab.com/lyoneel/tg-notify"
 )
 
 func TestSetProxy(t *testing.T) {

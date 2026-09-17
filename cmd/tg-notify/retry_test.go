@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 
-	"gitlab.com/lyoneel/tgnotify"
+	"gitlab.com/lyoneel/tg-notify"
 )
 
 func TestRunFlagValidation(t *testing.T) {
