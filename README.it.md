@@ -1,11 +1,11 @@
 ---
 version: 1.3.20260916
 last-updated: 2026-09-16
-title: Ly's CLI Telegram Notify
-description: CLI in Go per inviare messaggi e file Telegram tramite la Bot API
+title: Ly's Telegram Notify
+description: Libreria e CLI in Go per inviare messaggi e file Telegram tramite la Bot API
 ---
 
-# Ly's CLI Telegram Notify
+# Ly's Telegram Notify
 
 [English](README.md) | [Español](README.es.md) | **Italiano** | [Português](README.pt.md)
 

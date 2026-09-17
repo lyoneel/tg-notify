@@ -1,11 +1,11 @@
 ---
 version: 1.3.20260916
 last-updated: 2026-09-16
-title: Ly's CLI Telegram Notify
-description: Go CLI for sending Telegram messages and files via the Bot API
+title: Ly's Telegram Notify
+description: Go library and CLI for sending Telegram messages and files via the Bot API
 ---
 
-# Ly's CLI Telegram Notify
+# Ly's Telegram Notify
 
 **English** | [Español](README.es.md) | [Italiano](README.it.md) | [Português](README.pt.md)
 
@@ -181,7 +181,9 @@ per invocation.
 ## Use as a Go library
 
 The same client that powers the CLI is importable. The package is
-`tgnotify` at the repository root:
+`tgnotify` at the repository root; note the package name keeps the
+camel-case `tgnotify` while the import path ends in `tg-notify`, so a
+plain import resolves to the package name:
 
 ```bash
 go get gitlab.com/lyoneel/tg-notify
